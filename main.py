@@ -1,16 +1,73 @@
-# This is a sample Python script.
+"""
+This example shows how to use webhook on behind of any reverse proxy (nginx, traefik, ingress etc.)
+"""
+import logging
+import sys
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from aiohttp import web
+
+from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
+
+from aiogram.webhook.aiohttp_server import (
+    SimpleRequestHandler,
+    setup_application,
+)
+
+from commands.commands import router
+from settings.config import *
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+TOKEN = TOKEN
+
+WEB_SERVER_HOST = LOCAL
+WEB_SERVER_PORT = PORT
+
+WEBHOOK_PATH = "/webhook" + CALLBACK
+WEBHOOK_SECRET = SECRET
+BASE_WEBHOOK_URL = TEST_HOST
 
 
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
+async def on_startup(bot: Bot) -> None:
+    await bot.set_webhook(
+        f"{BASE_WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET
+    )
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+
+def main() -> None:
+    # Dispatcher is a root router
+    dp = Dispatcher()
+    # ... and all other routers should be attached to Dispatcher
+    dp.include_router(router)
+
+    # Register startup hook to initialize webhook
+    dp.startup.register(on_startup)
+
+    # Initialize Bot instance with a default parse mode which will be passed to all API calls
+    bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
+
+    # Create aiohttp.web.Application instance
+    app = web.Application()
+
+    # Create an instance of request handler,
+    # aiogram has few implementations for different cases of usage
+    # In this example we use SimpleRequestHandler which is designed to handle simple cases
+    webhook_requests_handler = SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot,
+        secret_token=WEBHOOK_SECRET,
+    )
+    # Register webhook handler on application
+    webhook_requests_handler.register(app, path=WEBHOOK_PATH)
+
+    # Mount dispatcher startup and shutdown hooks to aiohttp application
+    setup_application(app, dp, bot=bot)
+
+    # And finally start webserver
+    web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
+
+
+if __name__ == "__main__":
+    # logging.basicConfig(level=logging.INFO, filename="bot.log") TODO set logging in file bot.log in prod
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    main()
