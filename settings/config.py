@@ -5,6 +5,7 @@ load_dotenv()
 
 TEST_HOST = os.getenv("TEST_HOST")
 HOST = os.getenv("HOST")
+HOST_API = os.getenv("HOST_API")
 PORT = os.getenv("PORT")
 LOCAL = os.getenv("LOCAL")
 

@@ -1,6 +1,7 @@
 from aiogram import F, html, Router
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.storage.base import StorageKey
 from aiogram.types import (
     ReplyKeyboardRemove,
 )
@@ -13,14 +14,14 @@ email = Router()
 start = Router()
 
 
-@start.message(Command("clear"))
+@start.message(Command("cancel"))
 async def command_clear_handler(message: Message, state: FSMContext) -> None:
     """
-    This handler receives messages with `/clear` command
+    This handler receives messages with "cancel" or "exit" or "clear" commands
     """
     await state.clear()
     await message.answer(
-        "Cleared!",
+        "Canceled!",
         reply_markup=ReplyKeyboardRemove(),
     )
 
@@ -30,9 +31,8 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
     """
     This handler receives messages with `/start` command
     """
-    await state.set_state(Filter.registration)
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=buttons_start,
+        keyboard=buttons_start + buttons_cancel,
         resize_keyboard=True,
         input_field_placeholder="Which choose?",
     )
@@ -44,17 +44,28 @@ async def command_start_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(Filter.registration)
 
 
-@email.message(F.text.lower() == "here")
-@email.message(Filter.registration)
-async def command_here_handler(message: Message, state: FSMContext) -> None:
-    """
-    This handler receives messages with `here` text
-    """
-    await state.set_state(Filter.enter_email)
+# @email.message()
+@email.message(Filter.confirm_email and F.text.lower() == "edit")
+async def command_edit_email_handler(
+    message: Message, state: FSMContext
+) -> None:
     await message.answer(
         text="Enter your email:",
         reply_markup=ReplyKeyboardRemove(),
     )
+    await state.set_state(Filter.enter_email)
+
+
+@email.message(F.text.lower() == "here")
+async def command_here_handler(message: Message, state: FSMContext) -> None:
+    """
+    This handler receives messages with `here` text
+    """
+    await message.answer(
+        text="Enter your email:",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+    await state.set_state(Filter.enter_email)
 
 
 @email.message(Filter.enter_email)
@@ -64,7 +75,7 @@ async def email_handler(message: Message, state: FSMContext) -> None:
     """
     await state.set_state(Filter.confirm_email)
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=buttons_yes_no,
+        keyboard=buttons_correct_edit + buttons_cancel,
         resize_keyboard=True,
         input_field_placeholder="Which choose?",
     )
@@ -73,6 +84,14 @@ async def email_handler(message: Message, state: FSMContext) -> None:
     await message.reply(
         f"Email {html.quote(data['email'])} is correct?", reply_markup=keyboard
     )
+    await state.storage.set_data(
+        key=StorageKey(
+            bot_id=message.bot.id,
+            user_id=message.from_user.id,
+            chat_id=message.chat.id,
+        ),
+        data={"email": data["email"]},
+    )
 
 
 @email.message(Filter.confirm_email)
@@ -80,9 +99,16 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
     """
     This handler receives messages with `check_email` text
     """
+    email_from_redis = await state.storage.get_data(
+        key=StorageKey(
+            bot_id=message.bot.id,
+            user_id=message.from_user.id,
+            chat_id=message.chat.id,
+        )
+    )
     await message.reply(
-        "Here you login {login} and here you password {passwod}".format(
-            login=["email"], passwod=["password"]
+        "Here you login {login} and here you password {password}".format(
+            login=email_from_redis["email"], password=["password"]
         ),
         reply_markup=ReplyKeyboardRemove(),
     )
