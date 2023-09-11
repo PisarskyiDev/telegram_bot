@@ -15,22 +15,23 @@ from aiogram.webhook.aiohttp_server import (
 )
 
 from commands.commands import router
-from settings.config import *
+from settings.config import (
+    TOKEN,
+    LOCAL,
+    PORT,
+    TEST_HOST,
+    WEBHOOK_SECRET,
+    WEBHOOK_PATH,
+)
 
-
-TOKEN = TOKEN
 
 WEB_SERVER_HOST = LOCAL
 WEB_SERVER_PORT = PORT
 
-WEBHOOK_PATH = "/webhook" + CALLBACK
-WEBHOOK_SECRET = SECRET
-BASE_WEBHOOK_URL = TEST_HOST
-
 
 async def on_startup(bot: Bot) -> None:
     await bot.set_webhook(
-        f"{BASE_WEBHOOK_URL}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET
+        f"{TEST_HOST}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET
     )
 
 

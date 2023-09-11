@@ -8,7 +8,8 @@ HOST = os.getenv("HOST")
 PORT = os.getenv("PORT")
 LOCAL = os.getenv("LOCAL")
 
-SECRET = os.getenv("SECRET")
+WEBHOOK_SECRET = os.getenv("SECRET")
 TOKEN = os.getenv("TOKEN")
 
 CALLBACK = os.getenv("CALLBACK")
+WEBHOOK_PATH = "/webhook" + CALLBACK
