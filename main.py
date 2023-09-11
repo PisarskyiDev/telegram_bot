@@ -14,7 +14,7 @@ from aiogram.webhook.aiohttp_server import (
     setup_application,
 )
 
-from commands.commands import router
+from commands.commands import email, start
 from settings.config import (
     TOKEN,
     LOCAL,
@@ -39,7 +39,7 @@ def main() -> None:
     # Dispatcher is a root router
     dp = Dispatcher()
     # ... and all other routers should be attached to Dispatcher
-    dp.include_router(router)
+    dp.include_routers(start, email)
 
     # Register startup hook to initialize webhook
     dp.startup.register(on_startup)
