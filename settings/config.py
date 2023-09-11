@@ -13,3 +13,8 @@ TOKEN = os.getenv("TOKEN")
 
 CALLBACK = os.getenv("CALLBACK")
 WEBHOOK_PATH = "/webhook" + CALLBACK
+
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_USER = os.getenv("REDIS_USER")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")

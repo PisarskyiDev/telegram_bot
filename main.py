@@ -13,6 +13,7 @@ from aiogram.webhook.aiohttp_server import (
     SimpleRequestHandler,
     setup_application,
 )
+from redis.asyncio import Redis
 
 from commands.commands import email, start
 from settings.config import (
@@ -22,7 +23,13 @@ from settings.config import (
     TEST_HOST,
     WEBHOOK_SECRET,
     WEBHOOK_PATH,
+    REDIS_PASSWORD,
+    REDIS_HOST,
+    REDIS_PORT,
+    REDIS_USER,
 )
+
+from settings.redis import RedisStorage
 
 
 WEB_SERVER_HOST = LOCAL
@@ -37,7 +44,16 @@ async def on_startup(bot: Bot) -> None:
 
 def main() -> None:
     # Dispatcher is a root router
-    dp = Dispatcher()
+    dp = Dispatcher(
+        storage=RedisStorage(
+            redis=Redis(
+                host=REDIS_HOST,
+                port=REDIS_PORT,
+                username=REDIS_USER,
+                password=REDIS_PASSWORD,
+            )
+        )
+    )
     # ... and all other routers should be attached to Dispatcher
     dp.include_routers(start, email)
 
