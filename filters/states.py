@@ -9,3 +9,4 @@ class Form(StatesGroup):
     confirm_email = State()
     pass_email = State()
     before_finish = State()
+    successful = State()
