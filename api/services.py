@@ -30,8 +30,9 @@ async def send_request_to_api(email, password, url, token=False):
                     "refresh": response_data.get("refresh"),
                 }
             else:
-                message = await response.text()
-                return message
+                return (
+                    response.status
+                )  # TODO add handler if user exist or problem with data
 
 
 def get_clear_data(message: Message) -> dict:

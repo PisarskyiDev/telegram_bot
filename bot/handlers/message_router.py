@@ -8,9 +8,7 @@ message_handler = Router()
 
 
 @message_handler.message(States.confirm_email and F.text.lower() == "edit")
-async def command_edit_email_handler(
-    message: Message, state: FSMContext
-) -> None:
+async def edit_email_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
         text="Enter your email:",
@@ -20,7 +18,8 @@ async def command_edit_email_handler(
 
 
 @message_handler.message(F.text.lower() == "here")
-async def command_here_handler(message: Message, state: FSMContext) -> None:
+@message_handler.message(States.registration)
+async def here_handler(message: Message, state: FSMContext) -> None:
     """
     This handler receives messages with `here` text
     """

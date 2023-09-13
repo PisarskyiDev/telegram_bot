@@ -1,4 +1,4 @@
-from aiogram import Router, types, html
+from aiogram import Router, types, html, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.fsm.storage.base import StorageKey
@@ -60,9 +60,9 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
         )
     )
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=registrate,
+        keyboard=registrate + cancel,
         resize_keyboard=True,
-        input_field_placeholder="Confirm?",  # TODO refactoring this buttons after separate registrate section–––––––––
+        input_field_placeholder="Confirm?",
     )
     await message.reply(
         "Here you login: {login} and here you password: {password}".format(
@@ -72,18 +72,51 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
         reply_markup=keyboard,
     )
 
-    token = await send_request_to_api(
+    token_admin = await send_request_to_api(
         email=LOGIN, password=PASSWORD, url=TOKEN_URL
     )
-
     await state.set_state(States.before_finish)
+    await state.storage.set_data(
+        key=StorageKey(
+            bot_id=message.bot.id,
+            user_id=message.from_user.id,
+            chat_id=message.chat.id,
+        ),
+        data={
+            "details": from_redis["details"],
+            "token_admin": {
+                "access": token_admin["access"],
+                "refresh": token_admin["refresh"],
+            },
+        },
+    )
+
+
+@state_handler.message(States.before_finish)
+async def before_finish_handler(message: Message, state: FSMContext) -> None:
+    from_redis = await state.storage.get_data(
+        key=StorageKey(
+            bot_id=message.bot.id,
+            user_id=message.from_user.id,
+            chat_id=message.chat.id,
+        )
+    )
 
     response = await send_request_to_api(
         email=from_redis["details"]["email"],
         password=from_redis["details"]["password"],
         url=REGISTRATE_URL,
-        token=token["access"],
-    )  # TODO separate logic –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-
-    print(response)
+        token=from_redis["token_admin"]["access"],
+    )
     await state.set_state(States.successful)
+    if response == 201:
+        await message.reply(
+            f"Registration successful! \nYour login: {from_redis['details']['email']}\n"
+            f"Your password: {from_redis['details']['password']}",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
+    else:
+        await message.reply(
+            "Something went wrong! Re-try later",
+            reply_markup=types.ReplyKeyboardRemove(),
+        )
