@@ -48,7 +48,7 @@ def get_clear_data(message: Message) -> dict:
     return data
 
 
-def generate_password(length=15):
+def generate_password(length=12):
     characters = string.ascii_letters + string.digits + string.punctuation
 
     password = "".join(random.choice(characters) for _ in range(length))

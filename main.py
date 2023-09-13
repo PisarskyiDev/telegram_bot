@@ -1,6 +1,3 @@
-"""
-This example shows how to use webhook on behind of any reverse proxy (nginx, traefik, ingress etc.)
-"""
 import logging
 import sys
 
@@ -15,7 +12,10 @@ from aiogram.webhook.aiohttp_server import (
 )
 from redis.asyncio import Redis
 
-from commands.commands import first
+from bot.handlers.main_router import main_handler
+from bot.handlers.message_router import message_handler
+from bot.handlers.state_router import state_handler
+
 from settings.config import (
     TOKEN,
     LOCAL,
@@ -54,8 +54,12 @@ def main() -> None:
             )
         )
     )
-    # ... and all other routers should be attached to Dispatcher
-    dp.include_routers(first)
+
+    dp.include_routers(
+        main_handler,
+        state_handler,
+        message_handler,
+    )
 
     # Register startup hook to initialize webhook
     dp.startup.register(on_startup)
@@ -85,6 +89,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.INFO, filename="bot.log") TODO set logging in file bot.log in prod
+    # logging.basicConfig(level=logging.INFO, filename="bot.log") TODO set logging in file bot.log in prod–––––––––––––
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     main()
