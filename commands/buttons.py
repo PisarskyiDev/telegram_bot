@@ -25,3 +25,9 @@ buttons_correct_edit = [
         types.KeyboardButton(text="Edit"),
     ]
 ]
+
+buttons_registrate = [
+    [
+        types.KeyboardButton(text="Registrate"),
+    ]
+]

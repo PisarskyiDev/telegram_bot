@@ -15,7 +15,7 @@ from aiogram.webhook.aiohttp_server import (
 )
 from redis.asyncio import Redis
 
-from commands.commands import email, start
+from commands.commands import first
 from settings.config import (
     TOKEN,
     LOCAL,
@@ -55,7 +55,7 @@ def main() -> None:
         )
     )
     # ... and all other routers should be attached to Dispatcher
-    dp.include_routers(start, email)
+    dp.include_routers(first)
 
     # Register startup hook to initialize webhook
     dp.startup.register(on_startup)

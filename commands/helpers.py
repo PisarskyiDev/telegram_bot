@@ -1,18 +1,44 @@
-import json
 import random
 import string
-import aiohttp
 
 from aiogram.types import Message
 
-from settings.config import TOKEN_URL, REGISTRATE_URL
+import aiohttp
+import json
+
+
+async def send_request_to_api(email, password, url, token=False):
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "" if not token else f"Bearer {token}",
+    }
+    data = {
+        "email": email,
+        "password": password,
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            url,
+            headers=headers,
+            data=json.dumps(data),
+        ) as response:
+            if response.status == 200:
+                response_data = await response.json()
+                return {
+                    "response": response.status,
+                    "access": response_data.get("access"),
+                    "refresh": response_data.get("refresh"),
+                }
+            else:
+                message = await response.text()
+                return message
 
 
 def get_clear_data(message: Message) -> dict:
     data = {
-        "URL": "",
+        # "URL": "",
         "email": "",
-        "password": "",
+        # "password": "",
     }
     entities = message.entities
     for item in entities:
@@ -28,56 +54,3 @@ def generate_password(length=15):
     password = "".join(random.choice(characters) for _ in range(length))
 
     return password
-
-
-async def get_admin_token(email, password):
-    async with aiohttp.ClientSession() as session:
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "",
-        }
-
-        url = TOKEN_URL
-        data = {
-            "email": email,
-            "password": password,
-        }
-        async with session.post(
-            url,
-            headers=headers,
-            data=json.dumps(data),
-        ) as response:
-            if response.status == 200:
-                data = await response.json()
-                return data["access"]
-            else:
-                error = await response.text()
-                print("Ошибка:", response.status)
-                print("Текст ошибки:", error)
-                return error
-
-
-async def post_registrate_telegram_user(email, password, token):
-    async with aiohttp.ClientSession() as session:
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {token}",
-        }
-        url = REGISTRATE_URL
-        data = {
-            "email": email,
-            "password": password,
-        }
-        async with session.post(
-            url,
-            headers=headers,
-            data=json.dumps(data),
-        ) as response:
-            if response.status == 200:
-                data = await response.json()
-                return data.text()
-            else:
-                error = await response.text()
-                print("Ошибка:", response.status)
-                print("Текст ошибки:", error)
-                return error

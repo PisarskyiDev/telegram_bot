@@ -1,0 +1,16 @@
+name: Deploy Telegram bot
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+
+
+jobs:
+  deploy:
+    name: deploy to staging
+    runs-on: self-hosted
+    steps:
+      - name: SSH deploy
+        run: cd ~/ && sh deploy_bot.sh
