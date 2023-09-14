@@ -3,11 +3,12 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.fsm.storage.base import StorageKey
 
+from bot.commands import buttons
 from bot.commands.buttons import (
     cancel,
     correct_edit,
     registrate,
-    gpt_on,
+    ai_on,
 )
 from api.services import (
     get_clear_data,
@@ -111,12 +112,18 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
         url=REGISTRATE_URL,
         token=from_redis["token_admin"]["access"],
     )
+
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=buttons.ai_on + buttons.cancel,
+        resize_keyboard=True,
+        input_field_placeholder="Ai On?",
+    )
     await state.set_state(States.successful)
-    if response == 201:
+    if response["response"] == 201:
         await message.reply(
             f"Registration successful! \nYour login: {from_redis['details']['email']}\n"
             f"Your password: {from_redis['details']['password']}",
-            reply_markup=types.ReplyKeyboardRemove(),
+            reply_markup=keyboard,
         )
     else:
         await message.reply(
@@ -128,7 +135,7 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
 @state_handler.message(States.check_login)
 async def token_user_handler(message: Message, state: FSMContext) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=gpt_on + cancel,
+        keyboard=ai_on + cancel,
         resize_keyboard=True,
         input_field_placeholder="Confirm?",
     )
@@ -180,7 +187,7 @@ async def login_handler(message: Message, state: FSMContext) -> None:
         input_field_placeholder="Confirm?",
     )
     await message.reply(
-        "Enter your email and password separated by space:",
+        "Enter your email, and password put like this: (password)",
         reply_markup=keyboard,
     )
     await state.set_state(States.check_login)

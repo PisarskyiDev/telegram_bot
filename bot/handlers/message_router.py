@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from api.nova_ai.config import send_to_ai
-from bot.commands.buttons import cancel, gpt_off, gpt_on
+from bot.commands.buttons import cancel, ai_off, ai_on
 from bot.filters.states import Form as States
 
 message_handler = Router()
@@ -29,6 +29,7 @@ async def here_handler(message: Message, state: FSMContext) -> None:
     """
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=cancel,
+        resize_keyboard=True,
     )
     await message.answer(
         text="Enter your email:",
@@ -41,7 +42,8 @@ async def here_handler(message: Message, state: FSMContext) -> None:
 @message_handler.message(States.login_gpt_on)
 async def echo_handler_gpt_on(message: types.Message) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=cancel + gpt_off,
+        keyboard=ai_off + cancel,
+        resize_keyboard=True,
     )
     try:
         response_ai = await send_to_ai(message.text)
@@ -57,9 +59,11 @@ async def echo_handler_gpt_on(message: types.Message) -> None:
 @message_handler.message(States.login_gpt_off)
 async def echo_handler_gpt_off(message: types.Message) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=cancel + gpt_on,
+        keyboard=ai_on + cancel,
+        resize_keyboard=True,
+        input_field_placeholder="Gpt on?",
     )
     await message.answer(
-        text="Gpt is off, and this is simple echo answer",
+        text="Ai is off, and this is simple echo answer",
         reply_markup=keyboard,
     )

@@ -48,14 +48,14 @@ login_check = [
     ]
 ]
 
-gpt_on = [
+ai_on = [
     [
-        types.KeyboardButton(text="gpt On"),
+        types.KeyboardButton(text="Ai On"),
     ]
 ]
 
-gpt_off = [
+ai_off = [
     [
-        types.KeyboardButton(text="gpt Off"),
+        types.KeyboardButton(text="Ai Off"),
     ]
 ]

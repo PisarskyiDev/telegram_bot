@@ -20,6 +20,8 @@ no_handler = Router()
 async def echo_handler(message: types.Message) -> None:
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=registration + login + cancel,
+        resize_keyboard=True,
+        input_field_placeholder="Which choose?",
     )
     try:
         await message.answer(
