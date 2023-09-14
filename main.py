@@ -27,7 +27,8 @@ from settings.config import (
     REDIS_PASSWORD,
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_USER, TELEGRAM_HOST,
+    REDIS_USER,
+    TELEGRAM_HOST,
 )
 
 from settings.redis import RedisStorage
