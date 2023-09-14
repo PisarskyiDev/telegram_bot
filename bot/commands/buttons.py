@@ -14,6 +14,11 @@ share_profile = [
 
 start = [
     [
+        types.KeyboardButton(text="Start"),
+    ]
+]
+registration = [
+    [
         types.KeyboardButton(text="Here"),
         types.KeyboardButton(text="Website"),
     ]
@@ -29,5 +34,28 @@ correct_edit = [
 registrate = [
     [
         types.KeyboardButton(text="Registrate"),
+    ]
+]
+
+login = [
+    [
+        types.KeyboardButton(text="Login"),
+    ]
+]
+login_check = [
+    [
+        types.KeyboardButton(text="Send"),
+    ]
+]
+
+gpt_on = [
+    [
+        types.KeyboardButton(text="gpt On"),
+    ]
+]
+
+gpt_off = [
+    [
+        types.KeyboardButton(text="gpt Off"),
     ]
 ]

@@ -1,4 +1,5 @@
 import random
+import re
 import string
 
 from aiogram.types import Message
@@ -30,22 +31,26 @@ async def send_request_to_api(email, password, url, token=False):
                     "refresh": response_data.get("refresh"),
                 }
             else:
-                return (
-                    response.status
-                )  # TODO add handler if user exist or problem with data
+                return {
+                    "response": response.status
+                }  # TODO add handler if user exist or problem with data
 
 
-def get_clear_data(message: Message) -> dict:
-    data = {
-        # "URL": "",
-        "email": "",
-        # "password": "",
-    }
+def get_clear_data(
+    message: Message, password: bool = False, url: bool = False
+) -> dict:
+    data = {}
+    data["email"] = ""
+    if url:
+        data["URL"] = ""
     entities = message.entities
     for item in entities:
         for item.type in data.keys():
             data[item.type] = item.extract_from(message.text)
-
+    if password:
+        text = re.search(r"\((.*?)\)", message.text)
+        text = text.group(1)
+        data["password"] = text
     return data
 
 

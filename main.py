@@ -14,6 +14,7 @@ from redis.asyncio import Redis
 
 from bot.handlers.main_router import main_handler
 from bot.handlers.message_router import message_handler
+from bot.handlers.no_router import no_handler
 from bot.handlers.state_router import state_handler
 
 from settings.config import (
@@ -58,6 +59,7 @@ def main() -> None:
         main_handler,
         state_handler,
         message_handler,
+        no_handler,
     )
 
     dp.startup.register(on_startup)
@@ -77,6 +79,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, filename="bot.log")
+    # logging.basicConfig(level=logging.INFO, filename="bot.log")
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     main()
