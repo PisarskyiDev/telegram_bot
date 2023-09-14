@@ -8,7 +8,7 @@ from bot.commands.buttons import (
     cancel,
     correct_edit,
     registrate,
-    ai_on,
+    login,
 )
 from api.services import (
     get_clear_data,
@@ -135,7 +135,7 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
 @state_handler.message(States.check_login)
 async def token_user_handler(message: Message, state: FSMContext) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=ai_on + cancel,
+        keyboard=login + cancel,
         resize_keyboard=True,
         input_field_placeholder="Confirm?",
     )
