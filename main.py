@@ -28,6 +28,7 @@ from settings.config import (
     REDIS_HOST,
     REDIS_PORT,
     REDIS_USER,
+    TELEGRAM_HOST,
 )
 
 from settings.redis import RedisStorage
@@ -39,7 +40,7 @@ WEB_SERVER_PORT = PORT
 
 async def on_startup(bot: Bot) -> None:
     await bot.set_webhook(
-        f"{TEST_HOST}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET
+        f"{TELEGRAM_HOST}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET
     )
 
 
