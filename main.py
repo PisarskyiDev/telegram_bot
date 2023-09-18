@@ -21,7 +21,6 @@ from settings.config import (
     TOKEN,
     LOCAL,
     PORT,
-    TEST_HOST,
     WEBHOOK_SECRET,
     WEBHOOK_PATH,
     REDIS_PASSWORD,
@@ -80,6 +79,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, filename="bot.log")
     # logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     main()

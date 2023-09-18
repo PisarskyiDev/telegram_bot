@@ -24,9 +24,6 @@ async def edit_email_handler(message: Message, state: FSMContext) -> None:
 
 @message_handler.message(States.no_login, F.text.lower() == "here")
 async def here_handler(message: Message, state: FSMContext) -> None:
-    """
-    This handler receives messages with `here` text
-    """
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=cancel,
         resize_keyboard=True,
