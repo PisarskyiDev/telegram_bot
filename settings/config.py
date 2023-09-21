@@ -3,9 +3,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TEST_HOST = os.getenv("TEST_HOST")
 HOST = os.getenv("HOST")
-TELEGRAM_HOST = os.getenv("TELEGRAM_HOST")
+
 LOGIN_URL = os.getenv("LOGIN_URL")
 PORT = os.getenv("PORT")
 LOCAL = os.getenv("LOCAL")

@@ -1,25 +1,23 @@
 from aiogram import Router, types
 
-from bot.commands.buttons import registration, cancel, login
-from bot.filters.states import Form as States
+from bot.buttons.keyboard import registration, reset, login
+from bot.states.state import AllStates
 
 no_handler = Router()
 
 
 @no_handler.message(
-    States.no_login,
-    States.check_login,
-    States.registration,
-    States.enter_email,
-    States.error,
-    States.before_finish,
-    States.before_finish,
-    States.start,
+    AllStates.no_login,
+    AllStates.check_login,
+    AllStates.registration,
+    AllStates.enter_email,
+    AllStates.error,
+    AllStates.start,
 )
 @no_handler.message()
 async def echo_handler(message: types.Message) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=registration + login + cancel,
+        keyboard=registration + login + reset,
         resize_keyboard=True,
         input_field_placeholder="Which choose?",
     )

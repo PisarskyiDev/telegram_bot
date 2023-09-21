@@ -12,10 +12,11 @@ from aiogram.webhook.aiohttp_server import (
 )
 from redis.asyncio import Redis
 
-from bot.handlers.main_router import main_handler
-from bot.handlers.message_router import message_handler
-from bot.handlers.no_router import no_handler
-from bot.handlers.state_router import state_handler
+from bot.handlers.main import main
+from bot.handlers.ai import ai
+from bot.handlers.no_handler import no_handler
+from bot.handlers.checkout import checkout
+from bot.handlers.registration import registration
 
 from settings.config import (
     TOKEN,
@@ -27,23 +28,17 @@ from settings.config import (
     REDIS_HOST,
     REDIS_PORT,
     REDIS_USER,
-    TELEGRAM_HOST,
+    HOST,
 )
 
 from settings.redis import RedisStorage
 
 
-WEB_SERVER_HOST = LOCAL
-WEB_SERVER_PORT = PORT
-
-
 async def on_startup(bot: Bot) -> None:
-    await bot.set_webhook(
-        f"{TELEGRAM_HOST}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET
-    )
+    await bot.set_webhook(f"{HOST}{WEBHOOK_PATH}", secret_token=WEBHOOK_SECRET)
 
 
-def main() -> None:
+def run() -> None:
     dp = Dispatcher(
         storage=RedisStorage(
             redis=Redis(
@@ -56,9 +51,10 @@ def main() -> None:
     )
 
     dp.include_routers(
-        main_handler,
-        state_handler,
-        message_handler,
+        ai,
+        main,
+        checkout,
+        registration,
         no_handler,
     )
 
@@ -75,9 +71,9 @@ def main() -> None:
     )
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
-    web.run_app(app, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
+    web.run_app(app, host=LOCAL, port=PORT)
 
 
 if __name__ == "__main__":
-    # logging.basicConfig(level=logging.INFO, stream=sys.stdout)
-    main()
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    run()

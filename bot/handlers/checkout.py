@@ -3,29 +3,27 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from aiogram.fsm.storage.base import StorageKey
 
-from bot.commands import buttons
-from bot.commands.buttons import (
-    cancel,
+from bot.buttons.keyboard import (
+    reset,
     correct_edit,
     registrate,
     ai_on,
 )
-from api.services import (
+from api.service import (
     get_clear_data,
     generate_password,
     send_request_to_api,
 )
-from bot.filters.states import Form as States
+from bot.states.state import AllStates
 from settings.config import LOGIN, PASSWORD, TOKEN_URL, REGISTRATE_URL
 
-state_handler = Router()
+checkout = Router()
 
 
-@state_handler.message(States.enter_email)
+@checkout.message(AllStates.enter_email)
 async def email_handler(message: Message, state: FSMContext) -> None:
-    await state.clear()
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=correct_edit + cancel,
+        keyboard=correct_edit + reset,
         resize_keyboard=True,
         input_field_placeholder="Which choose?",
     )
@@ -47,10 +45,10 @@ async def email_handler(message: Message, state: FSMContext) -> None:
             },
         },
     )
-    await state.set_state(States.confirm_email)
+    await state.set_state(AllStates.confirm_email)
 
 
-@state_handler.message(States.confirm_email)
+@checkout.message(AllStates.confirm_email)
 async def correct_email_handler(message: Message, state: FSMContext) -> None:
     """
     This handler receives messages with `check_email` text
@@ -63,7 +61,7 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
         )
     )
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=registrate + cancel,
+        keyboard=registrate + reset,
         resize_keyboard=True,
         input_field_placeholder="Confirm?",
     )
@@ -78,8 +76,8 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
     token_admin = await send_request_to_api(
         email=LOGIN, password=PASSWORD, url=TOKEN_URL
     )
+    await state.set_state(AllStates.ready)
 
-    await state.set_state(States.before_finish)
     await state.storage.set_data(
         key=StorageKey(
             bot_id=message.bot.id,
@@ -96,7 +94,7 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
     )
 
 
-@state_handler.message(States.before_finish)
+@checkout.message(AllStates.ready)
 async def before_finish_handler(message: Message, state: FSMContext) -> None:
     from_redis = await state.storage.get_data(
         key=StorageKey(
@@ -114,28 +112,31 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
     )
 
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=buttons.ai_on + buttons.cancel,
+        keyboard=ai_on + reset,
         resize_keyboard=True,
         input_field_placeholder="Ai On?",
     )
-    await state.set_state(States.successful)
     if response["response"] == 201:
+        await state.set_state(AllStates.successful)
+
         await message.reply(
             f"Registration successful! \nYour login: {from_redis['details']['email']}\n"
             f"Your password: {from_redis['details']['password']}",
             reply_markup=keyboard,
         )
     else:
+        await state.set_state(AllStates.error)
+
         await message.reply(
             "Something went wrong! Re-try later",
-            reply_markup=types.ReplyKeyboardRemove(),
+            reply_markup=types.ReplyKeyboardRemove(),  # TODO add start/reset keyboard
         )
 
 
-@state_handler.message(States.check_login)
+@checkout.message(AllStates.check_login)
 async def token_user_handler(message: Message, state: FSMContext) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=ai_on + cancel,
+        keyboard=ai_on + reset,
         resize_keyboard=True,
         input_field_placeholder="Confirm?",
     )
@@ -169,20 +170,19 @@ async def token_user_handler(message: Message, state: FSMContext) -> None:
             f"Login successful!",
             reply_markup=keyboard,
         )
-        await state.clear()
-        await state.set_state(States.login_gpt_off)
+        await state.set_state(AllStates.logged_ai_off)
     else:
         await message.reply(
             "Something went wrong! Re-try later",
             reply_markup=types.ReplyKeyboardRemove(),
         )
-        await state.set_state(States.error)
+        await state.set_state(AllStates.error)
 
 
-@state_handler.message(F.text.lower() == "login", States.no_login)
+@checkout.message(F.text.lower() == "login", AllStates.no_login)
 async def login_handler(message: Message, state: FSMContext) -> None:
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=cancel,
+        keyboard=reset,
         resize_keyboard=True,
         input_field_placeholder="Confirm?",
     )
@@ -190,4 +190,4 @@ async def login_handler(message: Message, state: FSMContext) -> None:
         "Enter your email, and password put like this: (password)",
         reply_markup=keyboard,
     )
-    await state.set_state(States.check_login)
+    await state.set_state(AllStates.check_login)

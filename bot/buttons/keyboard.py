@@ -1,8 +1,8 @@
 from aiogram import types
 
-cancel = [
+reset = [
     [
-        types.KeyboardButton(text="Cancel"),
+        types.KeyboardButton(text="Reset"),
     ]
 ]
 
