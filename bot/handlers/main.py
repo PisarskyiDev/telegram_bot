@@ -24,6 +24,7 @@ async def reset_handler(message: Message, state: FSMContext) -> None:
 
 
 @main.message(F.text.lower() == "start")
+@main.message(Command("start"))
 async def start_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(registration + reset + login)
 
