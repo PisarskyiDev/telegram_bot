@@ -8,6 +8,7 @@ from bot.buttons.keyboard import (
     registrate,
     ai_on,
     keyboard_build,
+    start,
 )
 from api.service import (
     get_clear_data,
@@ -86,11 +87,11 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
         token=from_redis["token_admin"]["access"],
     )
 
-    keyboard = keyboard_build(ai_on + reset, placeholder="Ai On?")
-
     if response["response"] == 201:
         await state.set_state(AllStates.successful)
-
+        keyboard = keyboard_build(
+            ai_on + reset, placeholder="Registration successful!"
+        )
         await message.reply(
             f"Registration successful! \nYour login: {from_redis['details']['email']}\n"
             f"Your password: {from_redis['details']['password']}",
@@ -98,10 +99,11 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
         )
     else:
         await state.set_state(AllStates.error)
-
+        keyboard = keyboard_build(
+            start + reset, placeholder="Reset successful"
+        )
         await message.reply(
-            "Something went wrong! Re-try later",
-            reply_markup=types.ReplyKeyboardRemove(),  # TODO add start/reset keyboard
+            "Something went wrong! Re-try later", reply_markup=keyboard
         )
 
 
