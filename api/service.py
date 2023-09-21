@@ -54,9 +54,17 @@ def get_clear_data(
     return data
 
 
-def generate_password(length=12):
-    characters = string.ascii_letters + string.digits + string.punctuation
+def generate_password():
+    tsk = "tsk"
+    uppercase_letter = random.choice(string.ascii_uppercase)
+    lowercase_letters = "".join(
+        random.choice(string.ascii_lowercase) for _ in range(3)
+    )
+    digits = "".join(random.choice(string.digits) for _ in range(4))
+    symbols = "".join(random.choice(string.punctuation))
 
-    password = "".join(random.choice(characters) for _ in range(length))
+    password = (
+        tsk + uppercase_letter + lowercase_letters + digits + symbols + "!"
+    )
 
     return password
