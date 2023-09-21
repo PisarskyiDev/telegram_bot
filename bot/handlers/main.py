@@ -1,4 +1,5 @@
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -10,6 +11,7 @@ main = Router()
 
 
 @main.message(F.text.lower() == "reset")
+@main.message(Command("reset"))
 async def reset_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(start + reset)
 
