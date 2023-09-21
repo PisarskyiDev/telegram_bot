@@ -51,8 +51,8 @@ def run() -> None:
     )
 
     dp.include_routers(
-        ai,
         main,
+        ai,
         checkout,
         registration,
         no_handler,

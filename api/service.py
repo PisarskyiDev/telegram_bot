@@ -1,9 +1,9 @@
 import random
-import re
 import string
 from typing import Any
 
 from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State
 from aiogram.types import Message
 from aiogram.fsm.storage.base import StorageKey
 
@@ -40,7 +40,9 @@ async def send_request_to_api(email, password, url, token=False):
 
 
 async def redis_data(
-    state: FSMContext, message: Message, data: dict[str, Any] = None
+    state: FSMContext,
+    message: Message,
+    data: dict[str, Any] = None,
 ):
     if data is None:
         from_redis = await state.storage.get_data(
@@ -62,9 +64,7 @@ async def redis_data(
     return from_redis
 
 
-def get_clear_data(
-    message: Message, password: bool = False, url: bool = False
-) -> dict:
+def get_clear_data(message: Message, url: bool = False) -> dict:
     data = {}
     data["email"] = ""
     if url:
@@ -73,10 +73,6 @@ def get_clear_data(
     for item in entities:
         for item.type in data.keys():
             data[item.type] = item.extract_from(message.text)
-    if password:
-        text = re.search(r"\((.*?)\)", message.text)
-        text = text.group(1)
-        data["password"] = text
     return data
 
 

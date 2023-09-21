@@ -108,11 +108,11 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
 @checkout.message(AllStates.check_login)
 async def token_user_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(ai_on + reset, placeholder="Confirm?")
-    data = get_clear_data(message, password=True)
+    data = await redis_data(state=state, message=message)
 
     token_user = await send_request_to_api(
         email=data["email"],
-        password=data["password"],
+        password=message.text,  # here user send a password
         url=TOKEN_URL,
     )
 
@@ -120,7 +120,7 @@ async def token_user_handler(message: Message, state: FSMContext) -> None:
         data = {
             "details": {
                 "email": data["email"],
-                "password": data["password"],
+                "password": message.text,
             },
             "token_user": {
                 "access": token_user["access"],
@@ -145,7 +145,6 @@ async def token_user_handler(message: Message, state: FSMContext) -> None:
 @checkout.message(F.text.lower() == "login", AllStates.no_login)
 async def login_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(reset, "Enter email")
-
     await message.reply(
         "Enter your email:",
         reply_markup=keyboard,
@@ -154,9 +153,12 @@ async def login_handler(message: Message, state: FSMContext) -> None:
 
 
 @checkout.message(AllStates.no_login_pass)
-async def login_handler(message: Message, state: FSMContext) -> None:
+async def password_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(reset, "Enter password")
 
+    await redis_data(
+        state=state, message=message, data={"email": message.text}
+    )
     await message.reply(
         "Enter your password:",
         reply_markup=keyboard,
