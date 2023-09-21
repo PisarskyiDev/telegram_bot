@@ -5,6 +5,7 @@ class StartUpStates(StatesGroup):
     start = State()
     no_login = State()
     check_login = State()
+    no_login_pass = State()
 
 
 class RegistrationStates(StartUpStates):

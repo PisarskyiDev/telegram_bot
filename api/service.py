@@ -1,8 +1,11 @@
 import random
 import re
 import string
+from typing import Any
 
+from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
+from aiogram.fsm.storage.base import StorageKey
 
 import aiohttp
 import json
@@ -34,6 +37,29 @@ async def send_request_to_api(email, password, url, token=False):
                 return {
                     "response": response.status
                 }  # TODO add handler if user exist or problem with data
+
+
+async def redis_data(
+    state: FSMContext, message: Message, data: dict[str, Any] = None
+):
+    if data is None:
+        from_redis = await state.storage.get_data(
+            key=StorageKey(
+                bot_id=message.bot.id,
+                user_id=message.from_user.id,
+                chat_id=message.chat.id,
+            )
+        )
+    else:
+        from_redis = await state.storage.set_data(
+            key=StorageKey(
+                bot_id=message.bot.id,
+                user_id=message.from_user.id,
+                chat_id=message.chat.id,
+            ),
+            data=data,
+        )
+    return from_redis
 
 
 def get_clear_data(

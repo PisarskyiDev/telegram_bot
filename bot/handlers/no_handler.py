@@ -1,6 +1,6 @@
 from aiogram import Router, types
 
-from bot.buttons.keyboard import registration, reset, login
+from bot.buttons.keyboard import registration, reset, login, keyboard_build
 from bot.states.state import AllStates
 
 no_handler = Router()
@@ -16,11 +16,8 @@ no_handler = Router()
 )
 @no_handler.message()
 async def echo_handler(message: types.Message) -> None:
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=registration + login + reset,
-        resize_keyboard=True,
-        input_field_placeholder="Which choose?",
-    )
+    keyboard = keyboard_build(registration + login + reset)
+
     try:
         await message.answer(
             "You should registrate or login first!",

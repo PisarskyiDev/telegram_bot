@@ -1,18 +1,19 @@
 from aiogram import Router, types, html, F
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
-from aiogram.fsm.storage.base import StorageKey
 
 from bot.buttons.keyboard import (
     reset,
     correct_edit,
     registrate,
     ai_on,
+    keyboard_build,
 )
 from api.service import (
     get_clear_data,
     generate_password,
     send_request_to_api,
+    redis_data,
 )
 from bot.states.state import AllStates
 from settings.config import LOGIN, PASSWORD, TOKEN_URL, REGISTRATE_URL
@@ -32,19 +33,14 @@ async def email_handler(message: Message, state: FSMContext) -> None:
     await message.reply(
         f"Email {html.quote(data['email'])} is correct?", reply_markup=keyboard
     )
-    await state.storage.set_data(
-        key=StorageKey(
-            bot_id=message.bot.id,
-            user_id=message.from_user.id,
-            chat_id=message.chat.id,
-        ),
-        data={
-            "details": {
-                "password": generate_password(),
-                "email": data["email"],
-            },
+    data = {
+        "details": {
+            "password": generate_password(),
+            "email": data["email"],
         },
-    )
+    }
+
+    await redis_data(state=state, message=message, data=data)
     await state.set_state(AllStates.confirm_email)
 
 
@@ -53,18 +49,9 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
     """
     This handler receives messages with `check_email` text
     """
-    from_redis = await state.storage.get_data(
-        key=StorageKey(
-            bot_id=message.bot.id,
-            user_id=message.from_user.id,
-            chat_id=message.chat.id,
-        )
-    )
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=registrate + reset,
-        resize_keyboard=True,
-        input_field_placeholder="Confirm?",
-    )
+    from_redis = await redis_data(state=state, message=message)
+    keyboard = keyboard_build(registrate + reset, placeholder="Confirm?")
+
     await message.reply(
         "Here you login: {login} and here you password: {password}".format(
             login=from_redis["details"]["email"],
@@ -76,33 +63,21 @@ async def correct_email_handler(message: Message, state: FSMContext) -> None:
     token_admin = await send_request_to_api(
         email=LOGIN, password=PASSWORD, url=TOKEN_URL
     )
-    await state.set_state(AllStates.ready)
 
-    await state.storage.set_data(
-        key=StorageKey(
-            bot_id=message.bot.id,
-            user_id=message.from_user.id,
-            chat_id=message.chat.id,
-        ),
-        data={
-            "details": from_redis["details"],
-            "token_admin": {
-                "access": token_admin["access"],
-                "refresh": token_admin["refresh"],
-            },
+    data = {
+        "details": from_redis["details"],
+        "token_admin": {
+            "access": token_admin["access"],
+            "refresh": token_admin["refresh"],
         },
-    )
+    }
+    await redis_data(state=state, message=message, data=data)
+    await state.set_state(AllStates.ready)
 
 
 @checkout.message(AllStates.ready)
 async def before_finish_handler(message: Message, state: FSMContext) -> None:
-    from_redis = await state.storage.get_data(
-        key=StorageKey(
-            bot_id=message.bot.id,
-            user_id=message.from_user.id,
-            chat_id=message.chat.id,
-        )
-    )
+    from_redis = await redis_data(state=state, message=message)
 
     response = await send_request_to_api(
         email=from_redis["details"]["email"],
@@ -111,11 +86,8 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
         token=from_redis["token_admin"]["access"],
     )
 
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=ai_on + reset,
-        resize_keyboard=True,
-        input_field_placeholder="Ai On?",
-    )
+    keyboard = keyboard_build(ai_on + reset, placeholder="Ai On?")
+
     if response["response"] == 201:
         await state.set_state(AllStates.successful)
 
@@ -135,13 +107,9 @@ async def before_finish_handler(message: Message, state: FSMContext) -> None:
 
 @checkout.message(AllStates.check_login)
 async def token_user_handler(message: Message, state: FSMContext) -> None:
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=ai_on + reset,
-        resize_keyboard=True,
-        input_field_placeholder="Confirm?",
-    )
-
+    keyboard = keyboard_build(ai_on + reset, placeholder="Confirm?")
     data = get_clear_data(message, password=True)
+
     token_user = await send_request_to_api(
         email=data["email"],
         password=data["password"],
@@ -149,23 +117,18 @@ async def token_user_handler(message: Message, state: FSMContext) -> None:
     )
 
     if token_user["response"] == 200:
-        await state.storage.set_data(
-            key=StorageKey(
-                bot_id=message.bot.id,
-                user_id=message.from_user.id,
-                chat_id=message.chat.id,
-            ),
-            data={
-                "details": {
-                    "email": data["email"],
-                    "password": data["password"],
-                },
-                "token_user": {
-                    "access": token_user["access"],
-                    "refresh": token_user["refresh"],
-                },
+        data = {
+            "details": {
+                "email": data["email"],
+                "password": data["password"],
             },
-        )
+            "token_user": {
+                "access": token_user["access"],
+                "refresh": token_user["refresh"],
+            },
+        }
+        await redis_data(state=state, message=message, data=data)
+
         await message.reply(
             f"Login successful!",
             reply_markup=keyboard,
@@ -181,13 +144,21 @@ async def token_user_handler(message: Message, state: FSMContext) -> None:
 
 @checkout.message(F.text.lower() == "login", AllStates.no_login)
 async def login_handler(message: Message, state: FSMContext) -> None:
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=reset,
-        resize_keyboard=True,
-        input_field_placeholder="Confirm?",
-    )
+    keyboard = keyboard_build(reset, "Enter email")
+
     await message.reply(
-        "Enter your email, and password put like this: (password)",
+        "Enter your email:",
+        reply_markup=keyboard,
+    )
+    await state.set_state(AllStates.no_login_pass)
+
+
+@checkout.message(AllStates.no_login_pass)
+async def login_handler(message: Message, state: FSMContext) -> None:
+    keyboard = keyboard_build(reset, "Enter password")
+
+    await message.reply(
+        "Enter your password:",
         reply_markup=keyboard,
     )
     await state.set_state(AllStates.check_login)

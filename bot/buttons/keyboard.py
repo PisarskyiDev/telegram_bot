@@ -59,3 +59,12 @@ ai_off = [
         types.KeyboardButton(text="Ai Off"),
     ]
 ]
+
+
+def keyboard_build(buttons, placeholder: str = "Which choose?"):
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=buttons,
+        resize_keyboard=True,
+        input_field_placeholder=placeholder,
+    )
+    return keyboard
