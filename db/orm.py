@@ -1,9 +1,8 @@
 import asyncio
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.engine import engine
+from db.engine import engine, session
 from db.models import Users
 
 
@@ -18,11 +17,11 @@ async def register_user(message):
         name=message.from_user.full_name,
     )
 
-    async with AsyncSession(engine) as local_session:
+    async with session() as local_session:
         try:
             local_session.add(user)
             await local_session.commit()
-            await asyncio.sleep(999)
+
             return True
         except IntegrityError as e:
             if "UniqueViolation" in str(e.args):
@@ -35,6 +34,6 @@ async def register_user(message):
 
 
 async def select_user(user_id):
-    async with AsyncSession(engine) as local_session:
+    async with session() as local_session:
         user = await local_session.get(Users, user_id)
         return user
