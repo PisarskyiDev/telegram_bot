@@ -37,9 +37,9 @@ registrate = [
     ]
 ]
 
-login = [
+share = [
     [
-        types.KeyboardButton(text="Login"),
+        types.KeyboardButton(text="Share", request_contact=True),
     ]
 ]
 login_check = [

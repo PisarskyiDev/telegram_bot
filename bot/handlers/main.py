@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from bot.buttons.keyboard import start, reset, login, registration
+from bot.buttons.keyboard import start, reset, share
 from bot.buttons.keyboard import keyboard_build
 from bot.states.state import AllStates
 
@@ -26,10 +26,10 @@ async def reset_handler(message: Message, state: FSMContext) -> None:
 @main.message(F.text.lower() == "start")
 @main.message(Command("start"))
 async def start_handler(message: Message, state: FSMContext) -> None:
-    keyboard = keyboard_build(registration + reset + login)
+    keyboard = keyboard_build(share + reset)
 
     await message.answer(
-        "To use this bot you need to register on it first. Were you want to do it?",
+        "Please share your number to login in bot",
         reply_markup=keyboard,
     )
     await state.set_state(AllStates.no_login)

@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from aiogram.fsm.strategy import FSMStrategy
 from aiohttp import web
 
 from aiogram import Bot, Dispatcher
@@ -16,7 +17,6 @@ from bot.handlers.main import main
 from bot.handlers.ai import ai
 from bot.handlers.no_handler import no_handler
 from bot.handlers.checkout import checkout
-from bot.handlers.registration import registration
 
 from settings.config import (
     TOKEN,
@@ -47,14 +47,14 @@ def run() -> None:
                 username=REDIS_USER,
                 password=REDIS_PASSWORD,
             )
-        )
+        ),
+        fsm_strategy=FSMStrategy.CHAT,
     )
 
     dp.include_routers(
         main,
         ai,
         checkout,
-        registration,
         no_handler,
     )
 
