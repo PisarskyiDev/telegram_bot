@@ -1,7 +1,11 @@
+import configparser
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+# Get datas from .env
 
 HOST = os.getenv("HOST")
 
@@ -27,3 +31,9 @@ REDIS_USER = os.getenv("REDIS_USER")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
 GPT_KEY = os.getenv("GPT_KEY")
+
+
+BOT_DB_USERNAME = os.getenv("BOT_DB_USERNAME")
+BOT_DB_PASSWORD = os.getenv("BOT_DB_PASSWORD")
+BOT_DB_URL = os.getenv("BOT_DB_URL")
+BOT_DB_NAME = os.getenv("BOT_DB_NAME")

@@ -1,7 +1,6 @@
 import openai
 from settings.config import GPT_KEY
 
-# openai.organization = "org-iuEkLCUsDzSwFquqzMzjCYwn"
 openai.api_key = GPT_KEY
 
 
@@ -9,13 +8,16 @@ async def send_to_ai(text):
     response = await openai.ChatCompletion.acreate(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "answer succinctly"},
+            {
+                "role": "system",
+                "content": "answer succinctly, and spoke as Tasker bot",
+            },
             {"role": "user", "content": text},
         ],
-        max_tokens=200,
+        max_tokens=2000,
         n=1,
         stop=None,
-        temperature=0.2,
+        temperature=0.3,
         timeout=15,
     )
 
