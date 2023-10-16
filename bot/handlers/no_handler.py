@@ -16,7 +16,7 @@ no_handler = Router()
 )
 @no_handler.message()
 async def echo_handler(message: types.Message) -> None:
-    keyboard = keyboard_build(reset + share)
+    keyboard = keyboard_build(share + reset)
 
     try:
         await message.answer(

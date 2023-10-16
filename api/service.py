@@ -1,14 +1,13 @@
 import random
 import string
+import aiohttp
+import json
+
 from typing import Any
 
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State
 from aiogram.types import Message
 from aiogram.fsm.storage.base import StorageKey
-
-import aiohttp
-import json
 
 
 async def send_request_to_api(email, password, url, token=False):
@@ -62,18 +61,6 @@ async def redis_data(
             data=data,
         )
     return from_redis
-
-
-def get_clear_data(message: Message, url: bool = False) -> dict:
-    data = {}
-    data["email"] = ""
-    if url:
-        data["URL"] = ""
-    entities = message.entities
-    for item in entities:
-        for item.type in data.keys():
-            data[item.type] = item.extract_from(message.text)
-    return data
 
 
 def generate_password():

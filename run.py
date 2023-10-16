@@ -16,7 +16,6 @@ from redis.asyncio import Redis
 from bot.handlers.main import main
 from bot.handlers.ai import ai
 from bot.handlers.no_handler import no_handler
-from bot.handlers.checkout import checkout
 
 from settings.config import (
     TOKEN,
@@ -54,7 +53,6 @@ def run() -> None:
     dp.include_routers(
         main,
         ai,
-        checkout,
         no_handler,
     )
 

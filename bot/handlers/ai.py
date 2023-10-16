@@ -1,4 +1,4 @@
-from aiogram import Router, F, types
+from aiogram import Router, types
 
 from api.open_ai.config import send_to_ai
 from bot.buttons.keyboard import reset

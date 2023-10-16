@@ -60,6 +60,12 @@ ai_off = [
     ]
 ]
 
+profile = [
+    [
+        types.KeyboardButton(text="Profile"),
+    ]
+]
+
 
 def keyboard_build(buttons, placeholder: str = "Which choose?"):
     keyboard = types.ReplyKeyboardMarkup(

@@ -1,11 +1,18 @@
-from aiogram import Router, F
+from aiogram import F, Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from bot.buttons.keyboard import start, reset, share
-from bot.buttons.keyboard import keyboard_build
+from bot.buttons.keyboard import (
+    reset,
+    keyboard_build,
+    start,
+    share,
+    profile,
+)
+from bot.filter.contact import FilterContact, FilterUserId
 from bot.states.state import AllStates
+from db.orm import register_user, select_user
 
 main = Router()
 
@@ -33,3 +40,48 @@ async def start_handler(message: Message, state: FSMContext) -> None:
         reply_markup=keyboard,
     )
     await state.set_state(AllStates.no_login)
+
+
+@main.message(FilterContact())
+async def login_handler(message: Message, state: FSMContext) -> None:
+    keyboard = keyboard_build(profile + reset)
+    check = await FilterUserId.check_id(message)
+    text = None
+
+    if not check:
+        text = "Number was not confirmed! You can use only your own number"
+        await state.set_state(AllStates.no_login)
+
+    else:
+        user = await register_user(message)
+        if user and isinstance(user, str):
+            await message.reply(user, reply_markup=keyboard)
+            await state.set_state(AllStates.logged_ai_on)
+
+        elif user and isinstance(user, bool):
+            text = (
+                "Number confirmed successfully! Your account was created :) "
+                "\nNow you can use this bot"
+            )
+            await state.set_state(AllStates.logged_ai_on)
+        else:
+            text = (
+                "Number confirmed successfully! "
+                "But your account was not created! "
+                "\nPlease try again"
+            )
+    await message.reply(text, reply_markup=keyboard)
+
+
+@main.message(F.text.lower() == "profile")
+async def get_profile(message: Message) -> None:
+    keyboard = keyboard_build(profile + reset)
+    user = await select_user(message.from_user.id)
+    await message.reply(
+        "Your profile:"
+        f"\nName: {user.name}"
+        f"\nUsername: {user.username}"
+        f"\nId: {user.id}"
+        f"\nAdmin: {user.admin}",
+        reply_markup=keyboard,
+    )
