@@ -10,7 +10,7 @@ async def send_to_ai(text):
         messages=[
             {
                 "role": "system",
-                "content": "answer succinctly, and spoke as Tasker bot",
+                "content": "answer succinctly, and spoke as Tasker Assistant bot",
             },
             {"role": "user", "content": text},
         ],

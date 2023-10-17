@@ -1,4 +1,14 @@
-from sqlalchemy import ForeignKey, Column, Integer, Boolean, String, Text
+from datetime import datetime
+
+from sqlalchemy import (
+    ForeignKey,
+    Column,
+    Integer,
+    Boolean,
+    String,
+    Text,
+    DateTime,
+)
 from sqlalchemy.orm import relationship
 
 from db.engine import Base
@@ -11,24 +21,30 @@ class Users(Base):
     username = Column(String, nullable=True)
     name = Column(String)
     admin = Column(Boolean, default=False)
+    chats_user = relationship("Chats", back_populates="user")
+    messages_user = relationship("Messages", back_populates="user")
 
 
-class Groups(Base):
-    __tablename__ = "groups"
+class Chats(Base):
+    __tablename__ = "chats"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    admin = Column(Boolean, default=False)
+    type = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("Users")
+    user = relationship(
+        Users,
+        back_populates="chats_user",
+    )
 
 
 class Messages(Base):
     __tablename__ = "messages"
-
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=False)
+    date = Column(DateTime, default=datetime.now)
     message = Column(Text)
+    chat_id = Column(Integer, ForeignKey("chats.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("Users")
-    group_id = Column(Integer, ForeignKey("groups.id"))
-    group = relationship("Groups")
+    user = relationship(
+        Users,
+        back_populates="messages_user",
+    )

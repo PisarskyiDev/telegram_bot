@@ -12,6 +12,7 @@ from bot.buttons.keyboard import (
 )
 from bot.filter.contact import FilterContact, FilterUserId
 from bot.states.state import AllStates
+from db.engine import session
 from db.orm import register_user, select_user
 
 main = Router()
@@ -53,7 +54,7 @@ async def login_handler(message: Message, state: FSMContext) -> None:
         await state.set_state(AllStates.no_login)
 
     else:
-        user = await register_user(message)
+        user = await register_user(message=message, db=session)
         if user and isinstance(user, str):
             await message.reply(user, reply_markup=keyboard)
             await state.set_state(AllStates.logged_ai_on)
@@ -76,7 +77,7 @@ async def login_handler(message: Message, state: FSMContext) -> None:
 @main.message(F.text.lower() == "profile")
 async def get_profile(message: Message) -> None:
     keyboard = keyboard_build(profile + reset)
-    user = await select_user(message.from_user.id)
+    user = await select_user(user_id=message.from_user.id, db=session)
     await message.reply(
         "Your profile:"
         f"\nName: {user.name}"
