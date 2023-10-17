@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+  telegram_bot:
+    image: telegram_bot:latest
+    container_name: telegram_bot
+    volumes:
+      - static_volume:/telegram/static
+      - media_volume:/telegram/media
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:8443"
+    command: >
+      bash -c "python run.py run"
+
+
+volumes:
+  static_volume:
+  media_volume:
+
