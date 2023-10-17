@@ -41,7 +41,8 @@ class Messages(Base):
     __tablename__ = "messages"
     id = Column(Integer, primary_key=True, autoincrement=False)
     date = Column(DateTime, default=datetime.now)
-    message = Column(Text)
+    question = Column(Text)
+    answer = Column(Text, nullable=True)
     chat_id = Column(Integer, ForeignKey("chats.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship(

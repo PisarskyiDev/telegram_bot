@@ -16,6 +16,7 @@ class Chats(BaseModel):
 class Messages(BaseModel):
     id: int
     date: str
-    message: str
+    question: str
+    answer: str
     chat_id: int
     user_id: int

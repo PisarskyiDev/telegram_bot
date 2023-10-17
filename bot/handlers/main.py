@@ -46,31 +46,35 @@ async def start_handler(message: Message, state: FSMContext) -> None:
 @main.message(FilterContact())
 async def login_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(profile + reset)
-    check = await FilterUserId.check_id(message)
+    check_state = await state.get_state()
+    check_owner = await FilterUserId.check_id(message)
     text = None
 
-    if not check:
-        text = "Number was not confirmed! You can use only your own number"
-        await state.set_state(AllStates.no_login)
-
+    if check_state == AllStates.logged_ai_on:
+        text = "You are already logged in!"
     else:
-        user = await register_user(message=message, db=session)
-        if user and isinstance(user, str):
-            await message.reply(user, reply_markup=keyboard)
-            await state.set_state(AllStates.logged_ai_on)
+        if not check_owner:
+            text = "Number was not confirmed! You can use only your own number"
+            await state.set_state(AllStates.no_login)
 
-        elif user and isinstance(user, bool):
-            text = (
-                "Number confirmed successfully! Your account was created :) "
-                "\nNow you can use this bot"
-            )
-            await state.set_state(AllStates.logged_ai_on)
         else:
-            text = (
-                "Number confirmed successfully! "
-                "But your account was not created! "
-                "\nPlease try again"
-            )
+            user = await register_user(message=message, db=session)
+            if user and isinstance(user, str):
+                await message.reply(user, reply_markup=keyboard)
+                await state.set_state(AllStates.logged_ai_on)
+
+            elif user and isinstance(user, bool):
+                text = (
+                    "Number confirmed successfully! Your account was created :) "
+                    "\nNow you can use this bot"
+                )
+                await state.set_state(AllStates.logged_ai_on)
+            else:
+                text = (
+                    "Number confirmed successfully! "
+                    "But your account was not created! "
+                    "\nPlease try again"
+                )
     await message.reply(text, reply_markup=keyboard)
 
 
