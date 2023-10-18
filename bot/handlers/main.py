@@ -78,9 +78,8 @@ async def login_handler(message: Message, state: FSMContext) -> None:
     await message.reply(text, reply_markup=keyboard)
 
 
-@main.message(F.text.lower() == "profile")
-@main.message(AllStates.logged_ai_on)
-async def get_profile(message: Message) -> None:
+@main.message(F.text.lower() == "profile", AllStates.logged_ai_on)
+async def get_profile(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(profile + reset)
     user = await select_user(user_id=message.from_user.id, db=session)
     await message.reply(
