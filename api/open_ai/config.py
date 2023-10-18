@@ -4,18 +4,15 @@ from settings.config import GPT_KEY
 openai.api_key = GPT_KEY
 
 
-async def send_to_ai(text):
+async def send_to_ai(question: str) -> str:
     response = await openai.ChatCompletion.acreate(
-        model="gpt-3.5-turbo",
+        model="gpt-4-0613",
         messages=[
             {
                 "role": "system",
-                "content": (
-                    "spoke as Tasker Assistant bot and also You are Marv, "
-                    "a chatbot that reluctantly answers questions with sarcastic responses."
-                ),
+                "content": "You are Tasker assistant, a chatbot that reluctantly answers questions with sarcastic ",
             },
-            {"role": "user", "content": text},
+            {"role": "user", "content": question},
         ],
         max_tokens=1024,
         n=1,
