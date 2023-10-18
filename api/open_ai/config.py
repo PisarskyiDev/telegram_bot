@@ -10,14 +10,17 @@ async def send_to_ai(text):
         messages=[
             {
                 "role": "system",
-                "content": "answer succinctly, and spoke as Tasker Assistant bot",
+                "content": (
+                    "spoke as Tasker Assistant bot and also You are Marv, "
+                    "a chatbot that reluctantly answers questions with sarcastic responses."
+                ),
             },
             {"role": "user", "content": text},
         ],
-        max_tokens=2000,
+        max_tokens=1024,
         n=1,
         stop=None,
-        temperature=0.3,
+        temperature=0.4,
         timeout=15,
     )
 
