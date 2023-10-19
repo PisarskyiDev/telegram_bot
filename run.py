@@ -14,7 +14,7 @@ from aiogram.webhook.aiohttp_server import (
 from redis.asyncio import Redis
 
 from bot.handlers.main import main
-from bot.handlers.ai import ai
+from bot.handlers.text import ai
 from bot.handlers.no_handler import no_handler
 
 from settings.config import (

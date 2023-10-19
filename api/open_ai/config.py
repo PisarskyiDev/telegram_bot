@@ -14,7 +14,7 @@ async def send_to_ai(
         previous_question=previous_question,
     )
     response = await openai.ChatCompletion.acreate(
-        model="gpt-4-0613",
+        model="gpt-3.5-turbo",
         messages=[
             {
                 "role": "system",
