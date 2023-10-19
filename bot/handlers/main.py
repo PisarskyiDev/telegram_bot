@@ -58,12 +58,11 @@ async def login_handler(message: Message, state: FSMContext) -> None:
             await state.set_state(AllStates.no_login)
 
         else:
-            user = await register_user(message=message, db=session)
-            if user and isinstance(user, str):
-                await message.reply(user, reply_markup=keyboard)
+            result = await register_user(message=message, db=session)
+            if result and isinstance(result, str):
                 await state.set_state(AllStates.logged_ai_on)
-
-            elif user and isinstance(user, bool):
+                text = result
+            elif result and isinstance(result, bool):
                 text = (
                     "Number confirmed successfully! Your account was created :) "
                     "\nNow you can use this bot"
@@ -79,7 +78,7 @@ async def login_handler(message: Message, state: FSMContext) -> None:
 
 
 @main.message(F.text.lower() == "profile", AllStates.logged_ai_on)
-async def get_profile(message: Message, state: FSMContext) -> None:
+async def get_profile(message: Message) -> None:
     keyboard = keyboard_build(profile + reset)
     user = await select_user(user_id=message.from_user.id, db=session)
     await message.reply(

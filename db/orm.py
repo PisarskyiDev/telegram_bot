@@ -70,18 +70,25 @@ async def save_message(
 
 async def get_last_message(
     message: types.Message, db: Session
-) -> Type[models.Messages]:
-    async with db.begin() as local_session:
-        query = (
-            select(models.Messages)
-            .filter(models.Messages.user_id == message.from_user.id)
-            .order_by(models.Messages.id.desc())
-            .limit(1)
-        )
-        query_instance = await local_session.execute(query)
-        user = query_instance.scalar()
+) -> Type[models.Messages] | bool:
+    result = False
+    try:
+        async with db.begin() as local_session:
+            query = (
+                select(models.Messages)
+                .filter(models.Messages.user_id == message.from_user.id)
+                .order_by(models.Messages.id.desc())
+                .limit(1)
+            )
+            query_instance = await local_session.execute(query)
+            user = query_instance.scalar()
+
+            result = user
+    except Exception as e:
+        await local_session.rollback()
+    finally:
         await local_session.close()
-        return user
+        return result
 
 
 async def select_chat(
@@ -89,7 +96,6 @@ async def select_chat(
 ) -> Type[models.Chats] | bool:
     async with db.begin() as local_session:
         result = None
-
         chat = await local_session.get(models.Chats, message.chat.id)
         if chat is not None:
             result = chat
