@@ -21,8 +21,16 @@ class Users(Base):
     username = Column(String, nullable=True)
     name = Column(String)
     admin = Column(Boolean, default=False)
-    chats_user = relationship("Chats", back_populates="user")
-    messages_user = relationship("Messages", back_populates="user")
+    chats_user = relationship(
+        "Chats",
+        back_populates="user",
+        innerjoin=True,
+    )
+    messages_user = relationship(
+        "Messages",
+        back_populates="user",
+        innerjoin=True,
+    )
 
 
 class Chats(Base):
@@ -34,12 +42,17 @@ class Chats(Base):
     user = relationship(
         Users,
         back_populates="chats_user",
+        innerjoin=True,
     )
 
 
 class Messages(Base):
     __tablename__ = "messages"
-    id = Column(Integer, primary_key=True, autoincrement=False)
+    id = Column(
+        Integer,
+        primary_key=True,
+        autoincrement=False,
+    )
     date = Column(DateTime, default=datetime.now)
     question = Column(Text)
     answer = Column(Text, nullable=True)
@@ -48,4 +61,5 @@ class Messages(Base):
     user = relationship(
         Users,
         back_populates="messages_user",
+        innerjoin=True,
     )
