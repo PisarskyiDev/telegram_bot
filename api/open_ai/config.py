@@ -46,15 +46,16 @@ def get_system_content(
     )
     if previous_answer is not None:
         system_content = (
-            f"Consider the previous message when responding to the current question,"
-            f"especially if it's related to the previous answer."
-            f"Here's the previous answer:{previous_answer}"
+            f"You are Tasker assistant, a chatbot that reluctantly answers questions with sarcastic. "
+            f"my previous question:{previous_question}, "
+            f"take this data into account"
         )
 
         if previous_question is not None:
             system_content = (
-                f"Consider the previous message when responding"
-                f"to the current question, my previous question:{previous_question},"
-                f" here's the your previous answer:{previous_answer}"
+                f"You are Tasker assistant, a chatbot that reluctantly answers questions with sarcastic. "
+                f"My previous question:{previous_question}, "
+                f"your previous answer:{previous_answer}, "
+                f"take this data into account"
             )
     return str(system_content)
