@@ -9,13 +9,6 @@ class FilterContact(BaseFilter):
         else:
             return False
 
-
-class Filter:
-    def __init__(self, message: types.Message) -> None:
-        self.message = message
-
-
-class FilterUserId(Filter):
     @staticmethod
     async def check_id(message: types.Message) -> bool:
         if message.from_user.id == message.contact.user_id:

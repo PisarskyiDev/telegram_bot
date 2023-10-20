@@ -17,48 +17,13 @@ start = [
         types.KeyboardButton(text="Start"),
     ]
 ]
-registration = [
-    [
-        types.KeyboardButton(text="Here"),
-        types.KeyboardButton(text="Website"),
-    ]
-]
-
-correct_edit = [
-    [
-        types.KeyboardButton(text="Correct"),
-        types.KeyboardButton(text="Edit"),
-    ]
-]
-
-registrate = [
-    [
-        types.KeyboardButton(text="Registrate"),
-    ]
-]
 
 share = [
     [
         types.KeyboardButton(text="Share", request_contact=True),
     ]
 ]
-login_check = [
-    [
-        types.KeyboardButton(text="Send"),
-    ]
-]
 
-ai_on = [
-    [
-        types.KeyboardButton(text="Ai On"),
-    ]
-]
-
-ai_off = [
-    [
-        types.KeyboardButton(text="Ai Off"),
-    ]
-]
 
 profile = [
     [

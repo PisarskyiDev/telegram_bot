@@ -10,7 +10,7 @@ from bot.buttons.keyboard import (
     share,
     profile,
 )
-from bot.filter.contact import FilterContact, FilterUserId
+from bot.filter.contact import FilterContact
 from bot.states.state import AllStates
 from db.engine import session
 from db.orm import register_user, select_user
@@ -47,8 +47,7 @@ async def start_handler(message: Message, state: FSMContext) -> None:
 async def login_handler(message: Message, state: FSMContext) -> None:
     keyboard = keyboard_build(profile + reset)
     check_state = await state.get_state()
-    check_owner = await FilterUserId.check_id(message)
-    text = None
+    check_owner = await FilterContact.check_id(message)
 
     if check_state == AllStates.logged_ai_on:
         text = "You are already logged in!"

@@ -1,12 +1,27 @@
-from aiogram import Router, types
+from aiogram import Router, types, F
 
-from api.open_ai.config import send_to_ai
+from api.open_ai.config import send_to_ai, check_by_ai
+from bot.admin.info import list_commands, find_command
 from bot.buttons.keyboard import reset, profile
 from bot.states.state import AllStates
 from db.engine import session
 from db.orm import save_message, get_last_message
 
 ai = Router()
+
+
+@ai.message(F.text.lower()[0] == "?", AllStates.logged_ai_on)
+async def test(message: types.Message) -> None:
+    await message.reply("Your query was accepted, please wait...")
+    response = await check_by_ai(text=message.text)
+    if response != "404":
+        command = find_command(name=response)
+        if command is not None:
+            # command()
+            await command(message)
+            await message.answer(f"Done! {command.__name__} was executed")
+    else:
+        await message.reply("No command found, please try again")
 
 
 @ai.message(AllStates.logged_ai_on)
