@@ -1,7 +1,7 @@
 from aiogram import Router, types, F
 
 from api.open_ai.config import send_to_ai, check_by_ai
-from bot.admin.info import list_commands, find_command
+from bot.admin.core import find_command
 from bot.buttons.keyboard import reset, profile
 from bot.states.state import AllStates
 from db.engine import session
@@ -17,7 +17,6 @@ async def test(message: types.Message) -> None:
     if response != "404":
         command = find_command(name=response)
         if command is not None:
-            # command()
             await command(message)
             await message.answer(f"Done! {command.__name__} was executed")
     else:

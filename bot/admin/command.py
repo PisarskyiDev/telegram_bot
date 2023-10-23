@@ -5,8 +5,10 @@ async def battery_power(message: types.Message) -> None:
     await message.reply("Done! Battery is on!")
 
 
-# def admin_mode():
-#     pass
+def admin_mode(message: types.Message) -> None:
+    return
+
+
 #
 #
 # def set_admin():

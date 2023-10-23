@@ -19,7 +19,7 @@ def list_commands(default: bool = True) -> List[str] | List[object]:
     return command_list
 
 
-def find_command(name: str) -> str:
+def find_command(name: str) -> object:
     command_list = list_commands(default=False)
     for function in command_list:
         if function.__name__ == name:

@@ -1,6 +1,6 @@
 import openai
 
-from bot.admin.info import list_commands
+from bot.admin.core import list_commands
 from settings.config import GPT_KEY
 
 openai.api_key = GPT_KEY
