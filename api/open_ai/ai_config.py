@@ -7,7 +7,8 @@ openai.api_key = GPT_KEY
 
 
 async def check_by_ai(text: str) -> str:
-    commands = list_commands(default=True)
+    text = text.lower().replace("?", "").strip()
+    commands = list_commands(functions=False)
     clear_function_names = ",".join(commands)
 
     system_content = (

@@ -1,8 +1,9 @@
 from aiogram import Router, types, F
+from aiogram.fsm.context import FSMContext
 
-from api.open_ai.config import send_to_ai, check_by_ai
+from api.open_ai.ai_config import send_to_ai, check_by_ai
 from bot.admin.core import find_command
-from bot.buttons.keyboard import reset, profile
+from bot.buttons import keyboard
 from bot.states.state import AllStates
 from db.engine import session
 from db.orm import save_message, get_last_message
@@ -10,25 +11,24 @@ from db.orm import save_message, get_last_message
 ai = Router()
 
 
-@ai.message(F.text.lower()[0] == "?", AllStates.logged_ai_on)
-async def test(message: types.Message) -> None:
+@ai.message(F.text.lower()[0] == "?", AllStates.login)
+@ai.message(F.text.lower()[0] == "?", AllStates.admin_mode)
+async def command_handler_by_ai(
+    message: types.Message, state: FSMContext
+) -> None:
     await message.reply("Your query was accepted, please wait...")
     response = await check_by_ai(text=message.text)
     if response != "404":
         command = find_command(name=response)
         if command is not None:
-            await command(message)
-            await message.answer(f"Done! {command.__name__} was executed")
+            await command(message=message, state=state)
     else:
         await message.reply("No command found, please try again")
 
 
-@ai.message(AllStates.logged_ai_on)
+@ai.message(AllStates.login)
 async def gpt_on_handler(message: types.Message) -> None:
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=profile + reset,
-        resize_keyboard=True,
-    )
+    kb = keyboard.default_kb
     previous_massage = await get_last_message(message=message, db=session)
     try:
         await message.reply("Please wait a little bit, i`m thinking...")
@@ -44,7 +44,7 @@ async def gpt_on_handler(message: types.Message) -> None:
 
         await message.answer(
             text=response_ai,
-            reply_markup=keyboard,
+            reply_markup=kb,
         )
         await save_message(message=message, answer=response_ai, db=session)
     except TypeError as e:

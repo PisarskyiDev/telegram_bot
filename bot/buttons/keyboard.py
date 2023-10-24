@@ -6,12 +6,6 @@ reset = [
     ]
 ]
 
-share_profile = [
-    [
-        types.KeyboardButton(request_contact=True, text="Share number"),
-    ]
-]
-
 start = [
     [
         types.KeyboardButton(text="Start"),
@@ -32,10 +26,26 @@ profile = [
 ]
 
 
-def keyboard_build(buttons, placeholder: str = "Which choose?"):
+admin_off = [
+    [
+        types.KeyboardButton(text="Admin OFF"),
+    ]
+]
+admin_on = [
+    [
+        types.KeyboardButton(text="Admin ON"),
+    ]
+]
+
+
+def build(buttons):
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=buttons,
         resize_keyboard=True,
-        input_field_placeholder=placeholder,
     )
     return keyboard
+
+
+default_kb = build(profile + reset)
+start_kb = build(start + reset)
+admin_on_kb = build(admin_off + profile + reset)

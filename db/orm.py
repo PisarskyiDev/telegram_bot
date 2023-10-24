@@ -9,9 +9,13 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from db import models
+from db.engine import session
 
 
-async def register_user(message: types.Message, db: Session) -> bool | str:
+async def register_user(
+    message: types.Message,
+    db: Session = session,
+) -> bool | str:
     result = None
     username = (
         message.from_user.username if message.from_user.username else None
@@ -37,7 +41,10 @@ async def register_user(message: types.Message, db: Session) -> bool | str:
             return result
 
 
-async def select_user(user_id, db: Session) -> Type[models.Users]:
+async def select_user(
+    user_id,
+    db: Session = session,
+) -> Type[models.Users]:
     async with db.begin() as local_session:
         user = await local_session.get(models.Users, user_id)
         await local_session.close()
@@ -45,7 +52,9 @@ async def select_user(user_id, db: Session) -> Type[models.Users]:
 
 
 async def save_message(
-    message: types.Message, answer: str, db: Session
+    message: types.Message,
+    answer: str,
+    db: Session = session,
 ) -> None:
     db_message = models.Messages(
         id=message.message_id,
