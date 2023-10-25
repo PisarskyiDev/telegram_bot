@@ -21,6 +21,7 @@ class Users(Base):
     username = Column(String, nullable=True)
     name = Column(String)
     admin = Column(Boolean, default=False)
+    banned = Column(Boolean, default=False)
     chats_user = relationship(
         "Chats",
         back_populates="user",

@@ -1,13 +1,19 @@
+from __future__ import annotations
+
+import re
+
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from bot.buttons import keyboard
 from bot.states.state import AllStates
-from db.orm import select_user
+from db.orm import select_user, update_user
 
 
 class Commands:
     @staticmethod
-    async def battery_power(message: types.Message, state: FSMContext) -> None:
+    async def battery_power(
+        message: types.Message, _state: FSMContext
+    ) -> None:
         await message.reply("Done! Battery is on!")
 
     @staticmethod
@@ -38,31 +44,52 @@ class Commands:
                 reply_markup=keyboard.default_kb,
             )
 
+    @staticmethod
+    async def make_admin(
+        message: types.Message, _state: FSMContext
+    ) -> bool | None:
+        target_users = re.findall(r"@(\w+)", message.text)[0].split(",")
+        response = None
+        for user in target_users:
+            user = await select_user(username=user)
+            if user and user.admin:
+                await message.reply(
+                    "You already have admin rights",
+                    reply_markup=keyboard.admin_on_kb,
+                )
+                response = False
+            elif user and not user.admin:
+                response = await update_user(
+                    user_id=user.id,
+                    data={"admin": True},
+                    message=message,
+                )
+                await message.reply(
+                    f"{message.from_user.username} - have admin rights now",
+                )
+                if response:
+                    response = True
+        return response
 
-#
-#
-# def set_admin():
-#     pass
-#
-#
-# def del_admin():
-#     pass
-#
-#
-# def ban_user():
-#     pass
-#
-#
-# def unban_user():
-#     pass
-#
-#
-# def users_list():
-#     pass
-#
-#
-# def user_commands_list():
-#     pass
+    @staticmethod
+    def del_admin():
+        pass
+
+    @staticmethod
+    def ban_user():
+        pass
+
+    @staticmethod
+    def unban_user():
+        pass
+
+    @staticmethod
+    def users_list():
+        pass
+
+    @staticmethod
+    def user_commands_list():
+        pass
 
 
-variables = globals()
+# variables = globals()

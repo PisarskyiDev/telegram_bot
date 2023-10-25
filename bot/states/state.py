@@ -7,3 +7,4 @@ class AllStates(StatesGroup):
     no_login = State()
     login = State()
     admin_mode = State()
+    waiting_for_username = State()

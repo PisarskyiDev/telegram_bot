@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Type
+from typing import Type, Any
 
 from aiogram import types
 from sqlalchemy import select
@@ -42,13 +42,50 @@ async def register_user(
 
 
 async def select_user(
-    user_id,
+    user_id: int = None,
+    username: str = None,
     db: Session = session,
-) -> Type[models.Users]:
+) -> Type[models.Users] | None:
     async with db.begin() as local_session:
-        user = await local_session.get(models.Users, user_id)
-        await local_session.close()
+        if user_id is not None:
+            user = await local_session.get(models.Users, user_id)
+            await local_session.close()
+        elif username is not None:
+            # user = await local_session.get(models.Users, username)
+            query = select(models.Users).filter(
+                models.Users.username == username
+            )
+            query_instance = await local_session.execute(query)
+            user = query_instance.scalar()
+            await local_session.close()
+        else:
+            return None
         return user
+
+
+async def update_user(
+    user_id: int,
+    data: dict[str, Any],
+    message: types.Message,
+    db: Session = session,
+) -> bool | None:
+    async with db.begin() as local_session:
+        try:
+            user = await local_session.get(models.Users, user_id)
+            if user:
+                for key, value in data.items():
+                    if hasattr(user, key):
+                        setattr(user, key, value)
+                await local_session.commit()
+                await local_session.close()
+                return True
+        except Exception as e:
+            await local_session.rollback()
+            await local_session.close()
+            await message.answer(
+                "Something went wrong, please contact to admin",
+            )
+            return False
 
 
 async def save_message(
