@@ -50,25 +50,26 @@ class Commands:
     ) -> bool | None:
         target_users = re.findall(r"@(\w+)", message.text)[0].split(",")
         response = None
-        for user in target_users:
-            user = await select_user(username=user)
-            if user and user.admin:
-                await message.reply(
-                    "You already have admin rights",
-                    reply_markup=keyboard.admin_on_kb,
-                )
-                response = False
-            elif user and not user.admin:
-                response = await update_user(
-                    user_id=user.id,
-                    data={"admin": True},
-                    message=message,
-                )
-                await message.reply(
-                    f"{message.from_user.username} - have admin rights now",
-                )
-                if response:
-                    response = True
+
+        user = await select_user(username=target_users[0])
+        if user and user.admin:
+            await message.reply(
+                "You already have admin rights",
+                reply_markup=keyboard.admin_on_kb,
+            )
+            response = False
+
+        elif user and not user.admin:
+            response = await update_user(
+                user_id=user.id,
+                data={"admin": True},
+                message=message,
+            )
+            await message.reply(
+                f"{message.from_user.username} - have admin rights now",
+            )
+            if response:
+                response = True
         return response
 
     @staticmethod

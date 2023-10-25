@@ -6,10 +6,7 @@ from bot.states.state import AllStates
 no_handler = Router()
 
 
-@no_handler.message(
-    AllStates.no_login,
-)
-@no_handler.message()
+@no_handler.message(AllStates.no_login)
 async def echo_handler(message: types.Message) -> None:
     kb = keyboard.start_kb
 
