@@ -97,13 +97,14 @@ async def admin_on(message: Message, state: FSMContext) -> None:
 
 @main.message(F.text.lower() == "! make admin", AllStates.admin_mode)
 async def make_admin(message: Message, state: FSMContext) -> None:
-    # response = await Commands.make_admin(message, state)
-    await message.reply("Send username to make him admin")
+    await message.reply("Send username to GIVE him admin rights")
     await state.set_state(AllStates.waiting_for_username)
 
 
 @main.message(F.text.lower() == "! del admin", AllStates.admin_mode)
 async def del_admin(message: Message, state: FSMContext) -> None:
+    await message.reply("Send username to TAKE him admin rights")
+
     await Commands.del_admin()
 
 
