@@ -51,7 +51,6 @@ async def select_user(
             user = await local_session.get(models.Users, user_id)
             await local_session.close()
         elif username is not None:
-            # user = await local_session.get(models.Users, username)
             query = select(models.Users).filter(
                 models.Users.username == username
             )

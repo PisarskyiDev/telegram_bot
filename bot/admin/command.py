@@ -68,8 +68,6 @@ class Commands:
             await message.reply(
                 f"{message.from_user.username} - have admin rights now",
             )
-            if response:
-                response = True
         return response
 
     @staticmethod

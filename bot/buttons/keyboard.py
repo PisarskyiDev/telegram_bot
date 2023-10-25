@@ -28,12 +28,12 @@ profile = [
 
 admin_off = [
     [
-        types.KeyboardButton(text="Admin OFF"),
+        types.KeyboardButton(text="! Admin OFF"),
     ]
 ]
 admin_on = [
     [
-        types.KeyboardButton(text="Admin ON"),
+        types.KeyboardButton(text="! Admin ON"),
     ]
 ]
 
