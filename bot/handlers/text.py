@@ -4,6 +4,7 @@ from aiogram.fsm.context import FSMContext
 from api.open_ai.ai_config import send_to_ai, check_by_ai
 from bot.admin.core import find_command
 from bot.buttons import keyboard
+from bot.filter.admin_rights import AdminRights
 from bot.states.state import AllStates
 from db.engine import session
 from db.orm import save_message, get_last_message
@@ -11,8 +12,7 @@ from db.orm import save_message, get_last_message
 ai = Router()
 
 
-@ai.message(F.text.lower()[0] == "?", AllStates.login)
-@ai.message(F.text.lower()[0] == "?", AllStates.admin_mode)
+@ai.message(F.text.lower()[0] == "?", AdminRights())
 async def command_handler_by_ai(
     message: types.Message, state: FSMContext
 ) -> None:
@@ -21,9 +21,15 @@ async def command_handler_by_ai(
     if response != "404":
         command = find_command(name=response)
         if command is not None:
-            await command(message=message, state=state)
+            await command(message=message, state=state, ai=True)
     else:
         await message.reply("No command found, please try again")
+
+
+@ai.message(F.text.lower()[0] == "?", AllStates.login)
+@ai.message(F.text.lower()[0] == "?", AllStates.no_login)
+async def no_admin_rights(message: types.Message, state: FSMContext) -> None:
+    await message.answer("You dont have admin rights for this command")
 
 
 @ai.message(AllStates.login)

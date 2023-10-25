@@ -20,6 +20,7 @@ class Commands:
     async def admin_mode(
         message: types.Message,
         state: FSMContext,
+        ai: bool = False,
     ) -> None:
         is_admin = await select_user(user_id=message.from_user.id)
         exist_state = await state.get_state()
@@ -46,29 +47,33 @@ class Commands:
 
     @staticmethod
     async def make_admin(
-        message: types.Message, _state: FSMContext
+        message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
-        target_users = re.findall(r"@(\w+)", message.text)[0].split(",")
-        response = None
+        if not ai:
+            target_users = re.findall(r"@(\w+)", message.text)[0].split(",")
+            response = None
 
-        user = await select_user(username=target_users[0])
-        if user and user.admin:
-            await message.reply(
-                "You already have admin rights",
-                reply_markup=keyboard.admin_on_kb,
-            )
-            response = False
+            user = await select_user(username=target_users[0])
+            if user and user.admin:
+                await message.reply(
+                    "You already have admin rights",
+                    reply_markup=keyboard.admin_on_kb,
+                )
+                response = False
 
-        elif user and not user.admin:
-            response = await update_user(
-                user_id=user.id,
-                data={"admin": True},
-                message=message,
-            )
-            await message.reply(
-                f"{message.from_user.username} - have admin rights now",
-            )
-        return response
+            elif user and not user.admin:
+                response = await update_user(
+                    user_id=user.id,
+                    data={"admin": True},
+                    message=message,
+                )
+                await message.reply(
+                    f"{message.from_user.username} - have admin rights now",
+                )
+            return response
+        else:
+            await state.set_state(AllStates.waiting_for_username)
+            await message.reply("Send username to GIVE him admin rights")
 
     @staticmethod
     def del_admin():
