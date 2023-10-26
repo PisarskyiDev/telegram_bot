@@ -6,3 +6,4 @@ __pycache__/
 *.sh
 *.log
 *.ini
+.pytest_cache

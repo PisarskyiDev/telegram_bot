@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import re
-
 from aiogram import types
 from aiogram.fsm.context import FSMContext
+
+from bot.admin.manage import manage_admin
 from bot.buttons import keyboard
 from bot.states.state import AllStates
-from db.orm import select_user, update_user
+from db.orm import select_user
 
 
 class Commands:
@@ -46,38 +46,30 @@ class Commands:
             )
 
     @staticmethod
-    async def make_admin(
+    async def give_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
-        if not ai:
-            target_users = re.findall(r"@(\w+)", message.text)[0].split(",")
-            response = None
-
-            user = await select_user(username=target_users[0])
-            if user and user.admin:
-                await message.reply(
-                    "You already have admin rights",
-                    reply_markup=keyboard.admin_on_kb,
-                )
-                response = False
-
-            elif user and not user.admin:
-                response = await update_user(
-                    user_id=user.id,
-                    data={"admin": True},
-                    message=message,
-                )
-                await message.reply(
-                    f"{message.from_user.username} - have admin rights now",
-                )
-            return response
-        else:
-            await state.set_state(AllStates.waiting_for_username)
-            await message.reply("Send username to GIVE him admin rights")
+        state_type = AllStates.waiting_for_give
+        return await manage_admin(
+            message=message,
+            state=state,
+            state_type=state_type,
+            ai=ai,
+            set_admin=True,
+        )
 
     @staticmethod
-    def del_admin():
-        pass
+    async def take_admin(
+        message: types.Message, state: FSMContext, ai: bool = False
+    ) -> bool | None:
+        state_type = AllStates.waiting_for_take
+        return await manage_admin(
+            message=message,
+            state=state,
+            state_type=state_type,
+            ai=ai,
+            set_admin=False,
+        )
 
     @staticmethod
     def ban_user():

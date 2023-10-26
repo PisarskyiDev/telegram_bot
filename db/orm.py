@@ -52,7 +52,7 @@ async def select_user(
             await local_session.close()
         elif username is not None:
             query = select(models.Users).filter(
-                models.Users.username == username
+                models.Users.username == str(username)
             )
             query_instance = await local_session.execute(query)
             user = query_instance.scalar()
