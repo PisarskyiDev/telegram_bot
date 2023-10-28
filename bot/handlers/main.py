@@ -5,6 +5,7 @@ from aiogram.types import Message
 
 from bot.admin.command import Commands
 from bot.buttons import keyboard
+from bot.filter.admin_rights import AdminRights
 from bot.filter.contact import FilterContact
 from bot.states.state import AllStates
 from db.engine import session
@@ -105,6 +106,11 @@ async def give_admin(message: Message, state: FSMContext) -> None:
 async def take_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to TAKE him admin rights")
     await state.set_state(AllStates.waiting_for_take)
+
+
+@main.message(F.text.lower() == "! battery power", AdminRights())
+async def battery_power(message: Message) -> None:
+    await Commands.battery_power(message, session, ai=False)
 
 
 @main.message(AllStates.waiting_for_give)

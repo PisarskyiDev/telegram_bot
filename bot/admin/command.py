@@ -16,7 +16,7 @@ from settings.config import HA_LINK
 class Commands:
     @staticmethod
     async def battery_power(
-        message: types.Message, _state: FSMContext
+        message: types.Message, state: FSMContext, ai: bool
     ) -> None:
         url = f"https://{HA_LINK}/api/states/sensor.jk_b2a24s15p_battery1_voltage"
         headers = {
@@ -26,7 +26,10 @@ class Commands:
 
         response = get(url, headers=headers)
         state = response.json()["state"]
-        await message.reply(state)
+        await message.reply(
+            "Уровень заряда батарей: " + state + "V",
+            reply_markup=keyboard.default_kb,
+        )
 
     @staticmethod
     async def admin_mode(
