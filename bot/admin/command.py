@@ -7,6 +7,10 @@ from bot.admin.manage import manage_admin
 from bot.buttons import keyboard
 from bot.states.state import AllStates
 from db.orm import select_user
+from requests import get
+
+from settings.config import HA_TOKEN
+from settings.config import HA_LINK
 
 
 class Commands:
@@ -14,7 +18,15 @@ class Commands:
     async def battery_power(
         message: types.Message, _state: FSMContext
     ) -> None:
-        await message.reply("Done! Battery is on!")
+        url = f"https://{HA_LINK}/api/states/sensor.jk_b2a24s15p_battery1_voltage"
+        headers = {
+            "Authorization": f"Bearer {HA_TOKEN}",
+            "content-type": "application/json",
+        }
+
+        response = get(url, headers=headers)
+        state = response.json()["state"]
+        await message.reply(state)
 
     @staticmethod
     async def admin_mode(

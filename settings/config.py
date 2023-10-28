@@ -31,6 +31,9 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD")
 
 GPT_KEY = os.getenv("GPT_KEY")
 
+HA_TOKEN = os.getenv("HA_TOKEN")
+HA_LINK = os.getenv("HA_LINK")
+
 
 BOT_DB_USERNAME = os.getenv("BOT_DB_USERNAME")
 BOT_DB_PASSWORD = os.getenv("BOT_DB_PASSWORD")

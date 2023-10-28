@@ -85,12 +85,12 @@ async def get_profile(message: Message) -> None:
     )
 
 
-@main.message(F.text.lower() == "! admin off", AllStates.admin_mode)
+@main.message(F.text.lower() == "! admin mode", AllStates.admin_mode)
 async def admin_off(message: Message, state: FSMContext) -> None:
     await Commands.admin_mode(message, state)
 
 
-@main.message(F.text.lower() == "! admin on", AllStates.login)
+@main.message(F.text.lower() == "! admin mode", AllStates.login)
 async def admin_on(message: Message, state: FSMContext) -> None:
     await Commands.admin_mode(message, state)
 
