@@ -25,9 +25,21 @@ class Commands:
         }
 
         response = get(url, headers=headers)
-        state = response.json()["state"]
+        current_voltage = float(response.json()["state"])
+        min_voltage = 42.00
+        max_voltage = 58.80
+        percent = str(
+            int(
+                ((current_voltage - min_voltage) / (max_voltage - min_voltage))
+                * 100
+            )
+        )
+
         await message.reply(
-            "Уровень заряда батарей: " + state + "V",
+            "Уровень заряда батарей: "
+            + percent
+            + "%"
+            + f"\nНапряжение батарей: {current_voltage}V",
             reply_markup=keyboard.default_kb,
         )
 
