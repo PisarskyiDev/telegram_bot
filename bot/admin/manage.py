@@ -30,7 +30,7 @@ async def manage_admin(
             target_user = await select_user(username=target_user[0])
             if target_user.admin and set_admin:
                 await message.reply(
-                    f"{target_user.username} - already have admin rights",
+                    f"{target_user.username} - already admin",
                 )
             if query_user.admin:
                 query = {"admin": set_admin}
@@ -38,15 +38,13 @@ async def manage_admin(
                     user_id=target_user.id, data=query, message=message
                 )
             await message.reply(
-                f"{message.from_user.username} - "
-                f"{'HAVE' if set_admin else 'DONT have'} admin rights now",
+                f"{message.text} - "
+                f"{'is' if set_admin else 'is not'} admin now",
             )
-            await state.set_state(
-                AllStates.admin_mode if query_user.admin else AllStates.login
-            )
+            await state.set_state(AllStates.login)
 
             response = True
     except Exception as e:
-        await state.set_state(AllStates.admin_mode)
+        await state.set_state(AllStates.login)
     finally:
         return response

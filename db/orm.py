@@ -43,9 +43,9 @@ async def register_user(
             return result
 
 
-async def all_users(db: Session = session) -> list[Type[models.Users]]:
+async def sql_all_users(db: Session = session) -> list[Type[models.Users]]:
     async with db.begin() as local_session:
-        query = select(models.Users).filter(models.Users.admin == True)
+        query = select(models.Users)
         query_instance = await local_session.execute(query)
         users = query_instance.scalars().unique().all()
         await local_session.close()

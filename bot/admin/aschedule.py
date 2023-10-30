@@ -4,12 +4,10 @@ import requests
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from bot.admin.command import Commands
-from db.orm import all_users, select_user
 from settings.config import TOKEN
 
 battery_power = Commands.battery_power
-# list_users = asyncio.run(all_users())
-list_users = [412740881]
+list_users = [412740881, 379455128]
 last_state = 0
 
 
@@ -35,7 +33,6 @@ async def schedule_check_status_battery() -> None:
                     message = f"КРИТИЧЕСКИЙ уровень заряда: {percent}%\nНапряжение батарей: {current_voltage}V"
                 else:
                     message = f"Уровень заряда: {percent}%\nНапряжение батарей: {current_voltage}V"
-                # send_message(message, chat_id=user.id)
                 send_message(message, chat_id=user)
             last_state = percent
 

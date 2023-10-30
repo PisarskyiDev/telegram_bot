@@ -27,7 +27,7 @@ profile = [
 
 battery_power = [
     [
-        types.KeyboardButton(text="! Battery power"),
+        types.KeyboardButton(text="Battery power"),
     ]
 ]
 

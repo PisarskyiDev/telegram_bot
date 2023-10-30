@@ -2,16 +2,17 @@ from __future__ import annotations
 
 from typing import Any
 
-from aiogram import types
+from aiogram import types, Bot
+from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
 from bot.admin.manage import manage_admin
 from bot.buttons import keyboard
 from bot.states.state import AllStates
-from db.orm import select_user
+from db.orm import select_user, sql_all_users
 from requests import get
 
-from settings.config import HA_TOKEN
+from settings.config import HA_TOKEN, TOKEN
 from settings.config import HA_LINK
 
 
@@ -72,7 +73,7 @@ class Commands:
 
         if exist_state == AllStates.login and is_admin.admin:
             await state.set_state(AllStates.admin_mode)
-            admin_on_kb = keyboard.admin_on_kb
+            admin_on_kb = keyboard.default_kb
             await message.reply(
                 "Admin mode is activated!", reply_markup=admin_on_kb
             )
@@ -125,8 +126,17 @@ class Commands:
         pass
 
     @staticmethod
-    def users_list():
-        pass
+    async def all_users(
+        message: types.Message, state: FSMContext, ai: bool = False
+    ) -> None:
+        users = await sql_all_users()
+        bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
+        for user in users:
+            await bot.send_message(
+                chat_id=message.from_user.id,
+                text=f"@{user.username} - {user.id}",
+            )
+            await state.set_state(AllStates.admin_mode)
 
     @staticmethod
     def user_commands_list():

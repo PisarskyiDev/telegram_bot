@@ -14,6 +14,12 @@ from db.orm import register_user, select_user
 main = Router()
 
 
+@main.message(F.text.lower() == "cancel")
+async def cancel(message: Message, state: FSMContext) -> None:
+    await message.answer("Cancelled", reply_markup=keyboard.default_kb)
+    await state.set_state(AllStates.login)
+
+
 @main.message(F.text.lower() == "reset")
 @main.message(Command("reset"))
 async def reset_handler(message: Message, state: FSMContext) -> None:
@@ -86,29 +92,34 @@ async def get_profile(message: Message) -> None:
     )
 
 
-@main.message(F.text.lower() == "! admin mode", AllStates.admin_mode)
-async def admin_off(message: Message, state: FSMContext) -> None:
-    await Commands.admin_mode(message, state)
+# @main.message(F.text.lower() == "admin mode", AdminRights())
+# async def admin_off(message: Message, state: FSMContext) -> None:
+#     await Commands.admin_mode(message, state)
+#
+#
+# @main.message(F.text.lower() == "admin mode", AllStates.login)
+# async def admin_on(message: Message, state: FSMContext) -> None:
+#     await Commands.admin_mode(message, state)
 
 
-@main.message(F.text.lower() == "! admin mode", AllStates.login)
-async def admin_on(message: Message, state: FSMContext) -> None:
-    await Commands.admin_mode(message, state)
-
-
-@main.message(F.text.lower() == "! give admin", AllStates.admin_mode)
+@main.message(F.text.lower() == "give admin", AdminRights())
 async def give_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to GIVE him admin rights")
     await state.set_state(AllStates.waiting_for_give)
 
 
-@main.message(F.text.lower() == "! take admin", AllStates.admin_mode)
+@main.message(F.text.lower() == "take admin", AdminRights())
 async def take_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to TAKE him admin rights")
     await state.set_state(AllStates.waiting_for_take)
 
 
-@main.message(F.text.lower() == "! battery power", AdminRights())
+@main.message(F.text.lower() == "all users", AdminRights())
+async def call_all_users(message: Message, state: FSMContext) -> None:
+    await Commands.all_users(message, state, ai=False)
+
+
+@main.message(F.text.lower() == "battery power", AdminRights())
 async def call_battery_power(message: Message) -> None:
     await Commands.battery_power(message, session, ai=False)
 
