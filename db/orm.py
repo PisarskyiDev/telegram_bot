@@ -20,13 +20,14 @@ async def register_user(
     username = (
         message.from_user.username if message.from_user.username else None
     )
-    user = models.Users(
-        id=int(message.from_user.id),
-        username=username,
-        name=message.from_user.full_name,
-    )
+
     async with db.begin() as local_session:
         try:
+            user = models.Users(
+                id=message.from_user.id,
+                username=username,
+                name=message.from_user.full_name,
+            )
             local_session.add(user)
             await local_session.commit()
             result = True
@@ -39,6 +40,15 @@ async def register_user(
         finally:
             await local_session.close()
             return result
+
+
+async def all_users(db: Session = session) -> list[Type[models.Users]]:
+    async with db.begin() as local_session:
+        query = select(models.Users).filter(models.Users.admin == True)
+        query_instance = await local_session.execute(query)
+        users = query_instance.scalars().unique().all()
+        await local_session.close()
+        return users
 
 
 async def select_user(
