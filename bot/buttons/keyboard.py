@@ -25,15 +25,9 @@ profile = [
     ]
 ]
 
-
-admin_off = [
+battery_power = [
     [
-        types.KeyboardButton(text="! Admin OFF"),
-    ]
-]
-admin_on = [
-    [
-        types.KeyboardButton(text="! Admin ON"),
+        types.KeyboardButton(text="! Battery power"),
     ]
 ]
 
@@ -47,5 +41,4 @@ def build(buttons):
 
 
 default_kb = build(profile + reset)
-start_kb = build(start + reset)
-admin_on_kb = build(admin_off + profile + reset)
+start_kb = build(battery_power + start + reset)

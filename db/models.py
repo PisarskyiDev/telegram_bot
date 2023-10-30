@@ -19,7 +19,8 @@ class Users(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=True)
-    name = Column(String)
+    name = Column(String, nullable=True)
+    phone = Column(String, nullable=True)
     admin = Column(Boolean, default=False)
     banned = Column(Boolean, default=False)
     chats_user = relationship(

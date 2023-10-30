@@ -27,6 +27,7 @@ async def register_user(
                 id=message.from_user.id,
                 username=username,
                 name=message.from_user.full_name,
+                phone=message.contact.phone_number,
             )
             local_session.add(user)
             await local_session.commit()
