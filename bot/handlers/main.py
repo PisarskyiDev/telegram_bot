@@ -109,7 +109,7 @@ async def take_admin(message: Message, state: FSMContext) -> None:
 
 
 @main.message(F.text.lower() == "! battery power", AdminRights())
-async def battery_power(message: Message) -> None:
+async def call_battery_power(message: Message) -> None:
     await Commands.battery_power(message, session, ai=False)
 
 

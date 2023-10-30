@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 
@@ -16,8 +18,10 @@ from settings.config import HA_LINK
 class Commands:
     @staticmethod
     async def battery_power(
-        message: types.Message, state: FSMContext, ai: bool
-    ) -> None:
+        message: types.Message = None,
+        state: FSMContext = None,
+        ai: bool = None,
+    ) -> Any:
         url = f"https://{HA_LINK}/api/states/sensor.jk_b2a24s15p_battery1_voltage"
         headers = {
             "Authorization": f"Bearer {HA_TOKEN}",
@@ -25,23 +29,37 @@ class Commands:
         }
 
         response = get(url, headers=headers)
-        current_voltage = float(response.json()["state"])
+        state = response.json()["state"]
+        current_voltage = float(state) if state != "unavailable" else state
         min_voltage = 42.00
         max_voltage = 58.80
-        percent = str(
-            int(
-                ((current_voltage - min_voltage) / (max_voltage - min_voltage))
-                * 100
+        percent = (
+            str(
+                int(
+                    (
+                        (current_voltage - min_voltage)
+                        / (max_voltage - min_voltage)
+                    )
+                    * 100
+                )
             )
+            if state != "unavailable"
+            else state
         )
 
-        await message.reply(
-            "Уровень заряда батарей: "
-            + percent
-            + "%"
-            + f"\nНапряжение батарей: {current_voltage}V",
-            reply_markup=keyboard.default_kb,
-        )
+        if message is not None:
+            await message.reply(
+                "Уровень заряда: "
+                + percent
+                + "%"
+                + f"\nНапряжение батарей: {current_voltage}V",
+                reply_markup=keyboard.default_kb,
+            )
+        else:
+            if response.status_code == 200 and state != "unavailable":
+                return [current_voltage, percent]
+            else:
+                return state
 
     @staticmethod
     async def admin_mode(

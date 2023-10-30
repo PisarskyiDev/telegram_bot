@@ -13,6 +13,7 @@ from aiogram.webhook.aiohttp_server import (
 )
 from redis.asyncio import Redis
 
+from bot.admin.aschedule import task
 from bot.handlers.main import main
 from bot.handlers.text import ai
 from bot.handlers.no_handler import no_handler
@@ -29,8 +30,9 @@ from settings.config import (
     REDIS_USER,
     HOST,
 )
-
 from settings.redis import RedisStorage
+
+bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
 
 
 async def on_startup(bot: Bot) -> None:
@@ -58,8 +60,6 @@ def run() -> None:
 
     dp.startup.register(on_startup)
 
-    bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
-
     app = web.Application()
 
     webhook_requests_handler = SimpleRequestHandler(
@@ -74,4 +74,5 @@ def run() -> None:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+    task()
     run()
