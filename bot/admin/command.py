@@ -92,7 +92,7 @@ class Commands:
             )
 
     @staticmethod
-    async def give_admin(
+    async def add_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
         state_type = AllStates.waiting_for_give
@@ -105,7 +105,7 @@ class Commands:
         )
 
     @staticmethod
-    async def take_admin(
+    async def del_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
         state_type = AllStates.waiting_for_take

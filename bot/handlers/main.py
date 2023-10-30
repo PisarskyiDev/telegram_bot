@@ -92,23 +92,13 @@ async def get_profile(message: Message) -> None:
     )
 
 
-# @main.message(F.text.lower() == "admin mode", AdminRights())
-# async def admin_off(message: Message, state: FSMContext) -> None:
-#     await Commands.admin_mode(message, state)
-#
-#
-# @main.message(F.text.lower() == "admin mode", AllStates.login)
-# async def admin_on(message: Message, state: FSMContext) -> None:
-#     await Commands.admin_mode(message, state)
-
-
-@main.message(F.text.lower() == "give admin", AdminRights())
+@main.message(F.text.lower() == "add admin", AdminRights())
 async def give_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to GIVE him admin rights")
     await state.set_state(AllStates.waiting_for_give)
 
 
-@main.message(F.text.lower() == "take admin", AdminRights())
+@main.message(F.text.lower() == "del admin", AdminRights())
 async def take_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to TAKE him admin rights")
     await state.set_state(AllStates.waiting_for_take)
@@ -129,7 +119,7 @@ async def waiting_for_give(
     message: Message, state: FSMContext, _ai: bool = False
 ) -> None:
     await message.reply("Please wait...")
-    response = await Commands.give_admin(message, state)
+    response = await Commands.add_admin(message, state)
     if response is None:
         await message.reply("Something went wrong, maybe user not found")
     await state.set_state(AllStates.admin_mode)
@@ -140,6 +130,6 @@ async def waiting_for_take(
     message: Message, state: FSMContext, _ai: bool = False
 ) -> None:
     await message.reply("Please wait...")
-    response = await Commands.take_admin(message, state)
+    response = await Commands.del_admin(message, state)
     if response is None:
         await message.reply("Something went wrong, maybe user not found")
