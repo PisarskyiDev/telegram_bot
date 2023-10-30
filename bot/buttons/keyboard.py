@@ -40,5 +40,6 @@ def build(buttons):
     return keyboard
 
 
-default_kb = build(profile + reset)
-start_kb = build(battery_power + start + reset)
+# default_kb = build(profile + reset)
+default_kb = build(battery_power + profile + reset)
+start_kb = build(start + reset)
