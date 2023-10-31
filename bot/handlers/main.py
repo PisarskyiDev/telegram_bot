@@ -1,12 +1,13 @@
-from aiogram import F, Router
+from aiogram import F, Router, types
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from bot.admin.command import Commands
 from bot.buttons import keyboard
-from bot.filter.admin_rights import AdminRights
-from bot.filter.contact import FilterContact
+from bot.filter.admin_filter import Admin, NoAdmin
+from bot.filter.commands_filter import FoundCommand
+from bot.filter.contact_filter import FilterContact
 from bot.states.state import AllStates
 from db.engine import session
 from db.orm import register_user, select_user
@@ -43,6 +44,11 @@ async def start_handler(message: Message, state: FSMContext) -> None:
         reply_markup=kb,
     )
     await state.set_state(AllStates.no_login)
+
+
+@main.message(FoundCommand(), NoAdmin())
+async def check_admin_rights(message: types.Message) -> None:
+    await message.reply("You dont have admin rights for doing that")
 
 
 @main.message(FilterContact())
@@ -92,24 +98,24 @@ async def get_profile(message: Message) -> None:
     )
 
 
-@main.message(F.text.lower() == "add admin", AdminRights())
+@main.message(F.text.lower() == "add admin", Admin())
 async def give_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to GIVE him admin rights")
     await state.set_state(AllStates.waiting_for_give)
 
 
-@main.message(F.text.lower() == "del admin", AdminRights())
+@main.message(F.text.lower() == "del admin", Admin())
 async def take_admin(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to TAKE him admin rights")
     await state.set_state(AllStates.waiting_for_take)
 
 
-@main.message(F.text.lower() == "all users", AdminRights())
+@main.message(F.text.lower() == "all users", Admin())
 async def call_all_users(message: Message, state: FSMContext) -> None:
     await Commands.all_users(message, state, ai=False)
 
 
-@main.message(F.text.lower() == "battery power", AdminRights())
+@main.message(F.text.lower() == "battery power", Admin())
 async def call_battery_power(message: Message) -> None:
     await Commands.battery_power(message, session, ai=False)
 

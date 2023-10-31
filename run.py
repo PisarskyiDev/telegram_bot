@@ -73,7 +73,7 @@ def run() -> None:
     web.run_app(app, host=LOCAL, port=PORT)
 
 
-def start_schedule_1():
+def start_multi_schedule():
     loop = asyncio.new_event_loop()
     loop.create_task(start_schedule())
     loop.run_forever()
@@ -81,7 +81,6 @@ def start_schedule_1():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.ERROR, stream=sys.stdout)
-    schedule_process = multiprocessing.Process(target=start_schedule_1)
+    schedule_process = multiprocessing.Process(target=start_multi_schedule)
     schedule_process.start()
-
     run()
