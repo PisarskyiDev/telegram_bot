@@ -46,11 +46,6 @@ async def start_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(AllStates.no_login)
 
 
-@main.message(FoundCommand(), NoAdmin())
-async def check_admin_rights(message: types.Message) -> None:
-    await message.reply("You dont have admin rights for doing that")
-
-
 @main.message(FilterContact())
 async def login_handler(message: Message, state: FSMContext) -> None:
     kb = keyboard.default_kb
@@ -96,6 +91,11 @@ async def get_profile(message: Message) -> None:
         f"\nAdmin: {user.admin}",
         reply_markup=kb,
     )
+
+
+@main.message(FoundCommand(), NoAdmin())
+async def check_admin_rights(message: types.Message) -> None:
+    await message.reply("You dont have admin rights for doing that")
 
 
 @main.message(F.text.lower() == "add admin", Admin())
