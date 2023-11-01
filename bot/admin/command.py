@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Any
 
 from aiogram import types, Bot
@@ -62,35 +60,6 @@ class Commands:
         return response
 
     @staticmethod
-    async def admin_mode(
-        message: types.Message,
-        state: FSMContext,
-        _ai: bool = False,
-    ) -> None:
-        is_admin = await UserORM().select_user(user_id=message.from_user.id)
-        exist_state = await state.get_state()
-
-        if exist_state == AllStates.login and is_admin.admin:
-            await state.set_state(AllStates.admin_mode)
-            admin_on_kb = keyboard.default_kb
-            await message.reply(
-                "Admin mode is activated!", reply_markup=admin_on_kb
-            )
-            await state.set_state(AllStates.admin_mode)
-
-        elif exist_state == AllStates.admin_mode:
-            admin_off_kb = keyboard.default_kb
-            await message.reply(
-                "Admin mode is deactivated!", reply_markup=admin_off_kb
-            )
-            await state.set_state(AllStates.login)
-        else:
-            await message.reply(
-                "You dont have admin rights",
-                reply_markup=keyboard.default_kb,
-            )
-
-    @staticmethod
     async def add_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
@@ -144,7 +113,7 @@ class Commands:
         activate: bool,
         _state: FSMContext = None,
         _ai: bool = False,
-    ) -> None:
+    ) -> bool | None:
         target_user = get_username_from_message(message)
         user = await UserORM().select_user(username=target_user)
 

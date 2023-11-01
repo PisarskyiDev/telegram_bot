@@ -216,7 +216,7 @@ class ScheduleORM:
         self.db = session
         self.message = message
 
-    async def get_schedule_users(self) -> None:
+    async def get_schedule_users(self) -> list[Type[models]] | None:
         async with self.db.begin() as local_session:
             query = select(self.model.user_id).filter(
                 self.model.active == True
