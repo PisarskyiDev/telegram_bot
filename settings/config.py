@@ -17,6 +17,7 @@ PASSWORD = os.getenv("PASSWORD")
 # Telegram
 # TEST_TOKEN = os.getenv("TEST_TOKEN")
 WEBHOOK_SECRET = os.getenv("SECRET")
+# TOKEN = TEST_TOKEN
 TOKEN = os.getenv("TOKEN")
 
 
