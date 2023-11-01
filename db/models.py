@@ -23,6 +23,11 @@ class Users(Base):
     phone = Column(String, nullable=True)
     admin = Column(Boolean, default=False)
     banned = Column(Boolean, default=False)
+    schedule_user = relationship(
+        "Schedule",
+        back_populates="user",
+        innerjoin=True,
+    )
     chats_user = relationship(
         "Chats",
         back_populates="user",
@@ -35,6 +40,18 @@ class Users(Base):
     )
 
 
+class Schedule(Base):
+    __tablename__ = "schedule"
+    id = Column(Integer, primary_key=True)
+    active = Column(Boolean, default=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship(
+        "Users",
+        back_populates="schedule_user",
+        innerjoin=True,
+    )
+
+
 class Chats(Base):
     __tablename__ = "chats"
 
@@ -42,7 +59,7 @@ class Chats(Base):
     type = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship(
-        Users,
+        "Users",
         back_populates="chats_user",
         innerjoin=True,
     )
@@ -61,7 +78,7 @@ class Messages(Base):
     chat_id = Column(Integer, ForeignKey("chats.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship(
-        Users,
+        "Users",
         back_populates="messages_user",
         innerjoin=True,
     )

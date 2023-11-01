@@ -6,8 +6,7 @@ from bot.admin.core import find_command
 from bot.buttons import keyboard
 from bot.filter.admin_filter import NoAdmin
 from bot.states.state import AllStates
-from db.engine import session
-from db.orm import save_message, get_last_message
+from db.orm import MessageORM
 
 ai = Router()
 
@@ -21,7 +20,7 @@ async def command_handler_by_ai(
     if response != "404":
         command = find_command(name=response)
         if command is not None:
-            await command(message=message, state=state, ai=True)
+            await command(message, state, True)
     else:
         await message.reply("No command found, please try again")
 
@@ -35,7 +34,7 @@ async def no_admin_rights(message: types.Message) -> None:
 @ai.message(AllStates.login)
 async def gpt_on_handler(message: types.Message) -> None:
     kb = keyboard.default_kb
-    previous_massage = await get_last_message(message=message, db=session)
+    previous_massage = await MessageORM(message=message).get_last_message()
     try:
         await message.reply("Please wait a little bit, i`m thinking...")
         response_ai = await send_to_ai(
@@ -52,6 +51,6 @@ async def gpt_on_handler(message: types.Message) -> None:
             text=response_ai,
             reply_markup=kb,
         )
-        await save_message(message=message, answer=response_ai, db=session)
-    except TypeError as e:
+        await MessageORM(message=message).save_message(response_ai)
+    except TypeError:
         await message.answer("Nice try!")

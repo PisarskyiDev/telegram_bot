@@ -6,11 +6,11 @@ from aiogram import types, Bot
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
-from bot.admin.manage import manage_admin
+from bot.admin.manage import manage_admin, get_username_from_message
 from bot.buttons import keyboard
 from bot.states.state import AllStates
-from db.orm import select_user, sql_all_users
-from requests import get
+from db.orm import UserORM, ScheduleORM
+from requests import get, ReadTimeout
 
 from settings.config import HA_TOKEN, TOKEN
 from settings.config import HA_LINK
@@ -20,22 +20,25 @@ class Commands:
     @staticmethod
     async def battery_power(
         message: types.Message = None,
-        state: FSMContext = None,
-        ai: bool = None,
+        _state: FSMContext = None,
+        _ai: bool = None,
     ) -> Any:
         url = f"https://{HA_LINK}/api/states/sensor.jk_b2a24s15p_battery1_voltage"
         headers = {
             "Authorization": f"Bearer {HA_TOKEN}",
             "content-type": "application/json",
         }
+        try:
+            response = get(url, headers=headers, timeout=3)
+        except ReadTimeout:
+            response = "unavailable"
 
-        response = get(url, headers=headers)
-        state = response.json()["state"]
-        current_voltage = float(state) if state != "unavailable" else state
-        min_voltage = 42.00
-        max_voltage = 58.80
-        percent = (
-            str(
+        if response != "unavailable":
+            state = response.json()["state"]
+            current_voltage = float(state)
+            min_voltage = 42.00
+            max_voltage = 58.80
+            percent = str(
                 int(
                     (
                         (current_voltage - min_voltage)
@@ -44,31 +47,27 @@ class Commands:
                     * 100
                 )
             )
-            if state != "unavailable"
-            else state
-        )
 
-        if message is not None:
-            await message.reply(
-                "Уровень заряда: "
-                + percent
-                + "%"
-                + f"\nНапряжение батарей: {current_voltage}V",
-                reply_markup=keyboard.default_kb,
-            )
-        else:
-            if response.status_code == 200 and state != "unavailable":
-                return [current_voltage, percent]
+            if message is not None:
+                await message.reply(
+                    "Уровень заряда: "
+                    + percent
+                    + "%"
+                    + f"\nНапряжение батарей: {current_voltage}V",
+                    reply_markup=keyboard.default_kb,
+                )
             else:
-                return state
+                if response.status_code == 200:
+                    return [current_voltage, percent]
+        return response
 
     @staticmethod
     async def admin_mode(
         message: types.Message,
         state: FSMContext,
-        ai: bool = False,
+        _ai: bool = False,
     ) -> None:
-        is_admin = await select_user(user_id=message.from_user.id)
+        is_admin = await UserORM().select_user(user_id=message.from_user.id)
         exist_state = await state.get_state()
 
         if exist_state == AllStates.login and is_admin.admin:
@@ -95,7 +94,7 @@ class Commands:
     async def add_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
-        state_type = AllStates.waiting_for_give
+        state_type = AllStates.name_for_give
         return await manage_admin(
             message=message,
             state=state,
@@ -108,14 +107,15 @@ class Commands:
     async def del_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
-        state_type = AllStates.waiting_for_take
-        return await manage_admin(
+        state_type = AllStates.name_for_take
+        result = await manage_admin(
             message=message,
             state=state,
             state_type=state_type,
             ai=ai,
             set_admin=False,
         )
+        return result
 
     @staticmethod
     def ban_user():
@@ -127,20 +127,34 @@ class Commands:
 
     @staticmethod
     async def all_users(
-        message: types.Message, state: FSMContext, ai: bool = False
+        message: types.Message, state: FSMContext, _ai: bool = False
     ) -> None:
-        users = await sql_all_users()
+        users = await UserORM().get_all_users()
         bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
         for user in users:
             await bot.send_message(
                 chat_id=message.from_user.id,
                 text=f"@{user.username} - {user.id}",
             )
-            await state.set_state(AllStates.admin_mode)
+            await state.set_state(AllStates.login)
+
+    @staticmethod
+    async def change_schedule(
+        message: types.Message,
+        activate: bool,
+        _state: FSMContext = None,
+        _ai: bool = False,
+    ) -> None:
+        target_user = get_username_from_message(message)
+        user = await UserORM().select_user(username=target_user)
+
+        if user is not None:
+            response = await ScheduleORM(message=message).set_schedule(
+                target_id=user.id,
+                activate=activate,
+            )
+            return response
 
     @staticmethod
     def user_commands_list():
         pass
-
-
-# variables = globals()

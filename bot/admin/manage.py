@@ -7,7 +7,9 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State
 
 from bot.states.state import AllStates
-from db.orm import update_user, select_user
+from db import models
+
+from db.orm import UserORM
 
 
 async def manage_admin(
@@ -22,21 +24,39 @@ async def manage_admin(
     if ai:
         await state.set_state(state_type)
         await message.reply(text)
-        return
+
     try:
-        target_user = re.findall(r"@(\w+)", message.text)
+        target_user = get_username_from_message(message)
         if target_user:
-            query_user = await select_user(user_id=message.from_user.id)
-            target_user = await select_user(username=target_user[0])
+            query_user = await UserORM().select_user(
+                user_id=message.from_user.id
+            )
+            target_user = await UserORM().select_user(username=target_user)
+
+            if target_user.admin and set_admin:
+                await message.reply(
+                    f"@{target_user.username} - already admin",
+                )
+                response = True
+                return
+            elif not target_user.admin and not set_admin:
+                await message.reply(
+                    f"@{query_user.username} - not admin",
+                )
+                response = True
+                return
+
             if target_user.admin and set_admin:
                 await message.reply(
                     f"{target_user.username} - already admin",
                 )
+
             if query_user.admin:
                 query = {"admin": set_admin}
-                response = await update_user(
-                    user_id=target_user.id, data=query, message=message
-                )
+                response = await UserORM(
+                    model=models.Users, message=message
+                ).update(user_id=target_user.id, data=query)
+
             await message.reply(
                 f"{message.text} - "
                 f"{'is' if set_admin else 'is not'} admin now",
@@ -48,3 +68,8 @@ async def manage_admin(
         await state.set_state(AllStates.login)
     finally:
         return response
+
+
+def get_username_from_message(message: types.Message) -> str:
+    username = re.findall(r"@(.+)", message.text)[0]
+    return username

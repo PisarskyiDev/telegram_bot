@@ -1,5 +1,3 @@
-from typing import List
-
 from aiogram import types
 from aiogram.filters import BaseFilter
 
@@ -10,5 +8,8 @@ class FoundCommand(BaseFilter):
     @staticmethod
     async def __call__(message: types.Message) -> bool:
         commands = list_commands(functions=False)
-        text = message.text.strip().lower().replace(" ", "_")
+        try:
+            text = message.text.strip().lower().replace(" ", "_")
+        except AttributeError:
+            return False
         return True if text in commands else False
