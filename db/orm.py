@@ -28,23 +28,28 @@ class UserORM:
         self,
         user_id: int,
         data: dict[str, Any],
+        schedule: bool = False,
     ) -> bool | None:
         async with self.db.begin() as local_session:
             try:
-                # user = await local_session.get(self.model, user_id)
-                query = select(self.model).filter(
-                    self.model.user_id == user_id
-                )
-                query_instance = await local_session.execute(query)
-                schedule = query_instance.scalars().first()
-                if schedule:
+                if not schedule:
+                    instance = await local_session.get(self.model, user_id)
+
+                elif schedule and self.model is models.Schedule:
+                    query = select(self.model).filter(
+                        self.model.user_id == user_id
+                    )
+                    query_instance = await local_session.execute(query)
+                    instance = query_instance.scalars().first()
+
+                if instance:
                     for key, value in data.items():
-                        if hasattr(schedule, key):
-                            setattr(schedule, key, value)
+                        if hasattr(instance, key):
+                            setattr(instance, key, value)
                     await local_session.commit()
                     await local_session.close()
                     return True
-            except Exception:
+            except Exception as e:
                 await local_session.rollback()
                 await local_session.close()
                 await self.message.answer(
@@ -230,8 +235,8 @@ class ScheduleORM:
         self, target_id: int, activate: bool = True
     ) -> bool:
         try:
-            user = await UserORM(model=self.model).update(
-                user_id=target_id, data={"active": activate}
+            await UserORM(model=self.model).update(
+                user_id=target_id, data={"active": activate}, schedule=True
             )
             return True
         except Exception:

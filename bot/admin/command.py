@@ -63,11 +63,9 @@ class Commands:
     async def add_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
-        state_type = AllStates.name_for_give
         return await manage_admin(
             message=message,
             state=state,
-            state_type=state_type,
             ai=ai,
             set_admin=True,
         )
@@ -76,11 +74,9 @@ class Commands:
     async def del_admin(
         message: types.Message, state: FSMContext, ai: bool = False
     ) -> bool | None:
-        state_type = AllStates.name_for_take
         result = await manage_admin(
             message=message,
             state=state,
-            state_type=state_type,
             ai=ai,
             set_admin=False,
         )
