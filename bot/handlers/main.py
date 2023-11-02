@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from bot.admin.aschedule import send_message
 from bot.admin.command import Commands
 from bot.buttons import keyboard
 from bot.filter.admin_filter import Admin, NoAdmin
@@ -28,8 +29,12 @@ async def cancel(message: Message, state: FSMContext) -> None:
     Returns:
         None
     """
-
-    await message.answer("Cancelled", reply_markup=keyboard.default_kb)
+    kb = (
+        keyboard.default_kb_super_admin
+        if message.from_user.username == "Pisarskyi"
+        else keyboard.default_kb
+    )
+    await message.answer("Cancelled", reply_markup=kb)
     await state.set_state(AllStates.login)
 
 
@@ -71,11 +76,9 @@ async def start_handler(message: Message, state: FSMContext) -> None:
         None
     """
 
-    kb = keyboard.build(keyboard.share + keyboard.reset)
-
     await message.answer(
         "Please share your number to login in bot",
-        reply_markup=kb,
+        reply_markup=keyboard.share_kb,
     )
     await state.set_state(AllStates.no_login)
 
@@ -95,7 +98,12 @@ async def login_handler(message: Message, state: FSMContext) -> None:
         None: This function does not return anything.
     """
 
-    kb = keyboard.default_kb
+    kb = (
+        keyboard.default_kb_super_admin
+        if message.from_user.username == "Pisarskyi"
+        else keyboard.default_kb
+    )
+
     check_state = await state.get_state()
     check_owner = await FilterContact.check_id(message)
 
@@ -141,17 +149,16 @@ async def get_profile(message: Message) -> None:
     - None
     """
 
-    kb = keyboard.default_kb
     user = await UserORM(message=message).select_user(
         user_id=message.from_user.id
     )
     await message.reply(
         "Your profile:"
         f"\nName: {user.name}"
-        f"\nUsername: {user.username}"
+        f"\nUsername: @{user.username}"
+        f"\nPhone number: +{user.phone}"
         f"\nId: {user.id}"
         f"\nAdmin: {user.admin}",
-        reply_markup=kb,
     )
 
 
@@ -238,6 +245,13 @@ async def call_battery_power(message: Message) -> None:
         await message.reply("Battery is unavailable now")
 
 
+@main.message(F.text.lower() == "all schedule", Admin())
+async def call_all_schedule(message: Message, state: FSMContext) -> None:
+    response = await Commands.check_schedule_users(message=message)
+    for user in response:
+        send_message(message_text=user, chat_id=message.chat.id)
+
+
 @main.message(F.text.lower() == "add schedule", Admin())
 async def activate_schedule(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to add him to the Schedule")
@@ -248,6 +262,40 @@ async def activate_schedule(message: Message, state: FSMContext) -> None:
 async def deactivate_schedule(message: Message, state: FSMContext) -> None:
     await message.reply("Send username to del him from the Schedule")
     await state.set_state(AllStates.name_for_deactivate_schedule)
+
+
+@main.message(F.text.lower() == "ban user", Admin())
+async def call_ban_user(message: Message, state: FSMContext) -> None:
+    await message.reply("Send username to ban him")
+    await state.set_state(AllStates.name_for_ban_user)
+
+
+@main.message(F.text.lower() == "unban user", Admin())
+async def call_unban_user(message: Message, state: FSMContext) -> None:
+    await message.reply("Send username to unban him")
+    await state.set_state(AllStates.name_for_unban_user)
+
+
+@main.message(AllStates.name_for_ban_user)
+async def waiting_for_ban_user(
+    message: Message,
+    state: FSMContext,
+):
+    response = await Commands.ban_user(message=message, ban=True)
+    if response:
+        await message.reply(f"User - {message.text} banned")
+    await state.set_state(AllStates.login)
+
+
+@main.message(AllStates.name_for_unban_user)
+async def waiting_for_unban_user(
+    message: Message,
+    state: FSMContext,
+):
+    response = await Commands.ban_user(message=message, ban=False)
+    if response:
+        await message.reply(f"User - {message.text} unbanned")
+    await state.set_state(AllStates.login)
 
 
 @main.message(AllStates.name_for_activate_schedule)

@@ -6,7 +6,7 @@ from aiogram import types
 from sqlalchemy import select
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from db import models
 from db.engine import session

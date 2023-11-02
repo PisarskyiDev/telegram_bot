@@ -44,11 +44,6 @@ async def manage_admin(
                 response = True
                 return
 
-            if target_user.admin and set_admin:
-                await message.reply(
-                    f"{target_user.username} - already admin",
-                )
-
             if query_user.admin:
                 query = {"admin": set_admin}
                 response = await UserORM(
@@ -62,7 +57,7 @@ async def manage_admin(
             await state.set_state(AllStates.login)
 
             response = True
-    except Exception as e:
+    except Exception:
         await state.set_state(AllStates.login)
     finally:
         return response

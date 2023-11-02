@@ -10,3 +10,5 @@ class AllStates(StatesGroup):
     name_for_give = State()
     name_for_activate_schedule = State()
     name_for_deactivate_schedule = State()
+    name_for_ban_user = State()
+    name_for_unban_user = State()

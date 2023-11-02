@@ -7,11 +7,14 @@ from aiogram.fsm.context import FSMContext
 from bot.admin.manage import manage_admin, get_username_from_message
 from bot.buttons import keyboard
 from bot.states.state import AllStates
+from db import models
 from db.orm import UserORM, ScheduleORM
 from requests import get, ReadTimeout
 
 from settings.config import HA_TOKEN, TOKEN
 from settings.config import HA_LINK
+
+target = None
 
 
 class Commands:
@@ -83,12 +86,23 @@ class Commands:
         return result
 
     @staticmethod
-    def ban_user():
-        pass
-
-    @staticmethod
-    def unban_user():
-        pass
+    async def ban_user(
+        message: types.Message,
+        ban: bool = True,
+    ) -> bool:
+        target_username = get_username_from_message(message)
+        user = (
+            await UserORM().select_user(username=target_username)
+            if target is None or target.username != target_username
+            else target_username
+        )
+        try:
+            await UserORM(message=message).update(
+                user_id=user.id, data={"banned": ban}, schedule=False
+            )
+        except Exception as e:
+            return False
+        return True
 
     @staticmethod
     async def all_users(
@@ -110,8 +124,12 @@ class Commands:
         _state: FSMContext = None,
         _ai: bool = False,
     ) -> bool | None:
-        target_user = get_username_from_message(message)
-        user = await UserORM().select_user(username=target_user)
+        target_username = get_username_from_message(message)
+        user = (
+            await UserORM().select_user(username=target_username)
+            if target is None or target.username == target_username
+            else target
+        )
 
         if user is not None:
             response = await ScheduleORM(message=message).set_schedule(
@@ -119,6 +137,13 @@ class Commands:
                 activate=activate,
             )
             return response
+
+    @staticmethod
+    async def check_schedule_users(
+        message: types.Message,
+    ) -> list[models.Schedule] | None:
+        response = await ScheduleORM().get_schedule_users()
+        return response
 
     @staticmethod
     def user_commands_list():
